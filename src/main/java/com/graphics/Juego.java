@@ -33,33 +33,27 @@ public class Juego {
     private boolean finJuego;
     private boolean juegoTerminado;
 
-    private final int ubicacionOffset;
-    private final int ubicacionEscala;
-    private final int ubicacionColor;
+    private final Renderizador renderizador;
 
-    public Juego(int ubicacionOffset, int ubicacionEscala, int ubicacionColor) {
+    public Juego(Renderizador renderizador) {
         this.tuberias = new ArrayList<>();
         this.aleatorio = new Random();
         this.gapMinCentro = -0.45f;
         this.gapMaxCentro = 0.45f;
         this.pipeAncho = 0.18f;
         this.gapAlto = 0.48f;
-        this.ubicacionOffset = ubicacionOffset;
-        this.ubicacionEscala = ubicacionEscala;
-        this.ubicacionColor = ubicacionColor;
+        this.renderizador = renderizador;
         reiniciar();
     }
 
     public void reiniciar() {
         jugador1 = new Pajaro(BIRD_X_PLAYER1, 0.0f, GRAVEDAD, IMPULSO_SALTO,
                            VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO,
-                           new float[]{0.98f, 0.85f, 0.20f},
-                           ubicacionOffset, ubicacionEscala, ubicacionColor);
+                           new float[]{0.98f, 0.85f, 0.20f}, renderizador);
 
         jugador2 = new Pajaro(BIRD_X_PLAYER2, 0.0f, GRAVEDAD, IMPULSO_SALTO,
                            VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO,
-                           new float[]{0.25f, 0.55f, 0.95f},
-                           ubicacionOffset, ubicacionEscala, ubicacionColor);
+                           new float[]{0.25f, 0.55f, 0.95f}, renderizador);
 
         puntajeJugador1 = 0;
         puntajeJugador2 = 0;
@@ -176,8 +170,7 @@ public class Juego {
 
     private void crearTuberia() {
         float gapCentro = gapMinCentro + aleatorio.nextFloat() * (gapMaxCentro - gapMinCentro);
-        tuberias.add(new Tuberia(1.2f, gapCentro, pipeAncho, gapAlto,
-                          ubicacionOffset, ubicacionEscala, ubicacionColor));
+        tuberias.add(new Tuberia(1.2f, gapCentro, pipeAncho, gapAlto, renderizador));
     }
 
     private void actualizarDificultad() {

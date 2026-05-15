@@ -55,11 +55,7 @@ public class AppFlappyBird {
         renderizador = new Renderizador();
         generadorFondo = new GeneradorFondo(renderizador);
         generadorUI = new GeneradorUI(renderizador);
-        juego = new Juego(
-            renderizador.getUbicacionOffset(),
-            renderizador.getUbicacionEscala(),
-            renderizador.getUbicacionColor()
-        );
+        juego = new Juego(renderizador);
         entrada = new Entrada(ventana);
         sonido = new Sonido();
     }
@@ -90,9 +86,7 @@ public class AppFlappyBird {
         int estado = generadorUI.getEstadoJuego();
 
         if (estado == ESTADO_INICIO) {
-            if (entrada.sePresionoEspacio() || entrada.sePresionoEnter()) {
-                iniciarJuego();
-            } else if (entrada.saltoJugador2()) {
+            if (entrada.sePresionoEnter()) {
                 iniciarJuego();
             }
         } else if (estado == ESTADO_JUGANDO) {
@@ -146,6 +140,13 @@ public class AppFlappyBird {
         renderizador.usarPrograma();
         generadorFondo.dibujar();
         juego.dibujarTuberias();
+        int estado = generadorUI.getEstadoJuego();
+        if (estado == ESTADO_INICIO) {
+            generadorUI.dibujar();
+            juego.dibujarJugadores();
+            return;
+        }
+
         juego.dibujarJugadores();
         generadorUI.dibujar();
     }
@@ -157,7 +158,7 @@ public class AppFlappyBird {
 
         int estado = generadorUI.getEstadoJuego();
         if (estado == ESTADO_INICIO) {
-            titulo += " | SPACE/W para jugar";
+            titulo += " | ENTER para jugar";
         } else if (estado == ESTADO_GAME_OVER) {
             titulo += " | GAME OVER";
         }

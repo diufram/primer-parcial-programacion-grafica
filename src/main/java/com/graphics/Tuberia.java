@@ -1,7 +1,6 @@
 package com.graphics;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
+import com.graphics.formas.Sprite;
 
 public class Tuberia {
     private float x;
@@ -10,215 +9,107 @@ public class Tuberia {
 
     private final float ancho;
     private final float gapAlto;
+    private final Renderizador renderizador;
 
-    private final int ubicacionOffset;
-    private final int ubicacionEscala;
-    private final int ubicacionColor;
+    private static final int CUERPO_COLUMNAS = 12;
+    private static final int CABEZA_COLUMNAS = 14;
+    private static final int CABEZA_FILAS = 4;
 
-    public Tuberia(float x, float gapCentroY, float ancho, float gapAlto,
-            int ubicacionOffset, int ubicacionEscala, int ubicacionColor) {
+    public Tuberia(float x, float gapCentroY, float ancho, float gapAlto, Renderizador renderizador) {
         this.x = x;
         this.gapCentroY = gapCentroY;
         this.ancho = ancho;
         this.gapAlto = gapAlto;
-        this.ubicacionOffset = ubicacionOffset;
-        this.ubicacionEscala = ubicacionEscala;
-        this.ubicacionColor = ubicacionColor;
+        this.renderizador = renderizador;
         this.puntuada = false;
     }
 
-    public void actualizar(float velX, float dt) {
-        x -= velX * dt;
-    }
-
-    public float getX() {
-        return x;
-    }
-
-    public float getAncho() {
-        return ancho;
-    }
-
-    public float getGapCentroY() {
-        return gapCentroY;
-    }
-
-    public float getGapAlto() {
-        return gapAlto;
-    }
-
-    public boolean estaPuntuada() {
-        return puntuada;
-    }
-
-    public void setPuntuada(boolean puntuada) {
-        this.puntuada = puntuada;
-    }
-
-    public float getGapSuperior() {
-        return gapCentroY + (gapAlto * 0.5f);
-    }
-
-    public float getGapInferior() {
-        return gapCentroY - (gapAlto * 0.5f);
-    }
-
-    public float getAltoSuperior() {
-        return 1.0f - getGapSuperior();
-    }
-
-    public float getAltoInferior() {
-        return getGapInferior() + 1.0f;
-    }
-
-    public float getYCentroSuperior() {
-        return getGapSuperior() + (getAltoSuperior() * 0.5f);
-    }
-
-    public float getYCentroInferior() {
-        return -1.0f + (getAltoInferior() * 0.5f);
-    }
-
-    public boolean estaFueraDePantalla() {
-        return x + (ancho * 0.5f) < -1.3f;
-    }
-
-    public boolean pasoPorX(float birdX) {
-        return x + (ancho * 0.5f) < birdX && !puntuada;
-    }
+    public void actualizar(float velX, float dt) { x -= velX * dt; }
+    public float getX() { return x; }
+    public float getAncho() { return ancho; }
+    public float getGapCentroY() { return gapCentroY; }
+    public float getGapAlto() { return gapAlto; }
+    public boolean estaPuntuada() { return puntuada; }
+    public void setPuntuada(boolean puntuada) { this.puntuada = puntuada; }
+    public float getGapSuperior() { return gapCentroY + (gapAlto * 0.5f); }
+    public float getGapInferior() { return gapCentroY - (gapAlto * 0.5f); }
+    public float getAltoSuperior() { return 1.0f - getGapSuperior(); }
+    public float getAltoInferior() { return getGapInferior() + 1.0f; }
+    public float getYCentroSuperior() { return getGapSuperior() + (getAltoSuperior() * 0.5f); }
+    public float getYCentroInferior() { return -1.0f + (getAltoInferior() * 0.5f); }
+    public boolean estaFueraDePantalla() { return x + (ancho * 0.5f) < -1.3f; }
+    public boolean pasoPorX(float birdX) { return x + (ancho * 0.5f) < birdX && !puntuada; }
 
     public void dibujar(float r, float g, float b) {
         float altoSuperior = getAltoSuperior();
-
         if (altoSuperior > 0.0f) {
-            dibujarTuberiaPixel(
-                    x,
-                    getYCentroSuperior(),
-                    ancho,
-                    altoSuperior,
-                    true);
+            dibujarBloqueTuberia(x, getYCentroSuperior(), ancho, altoSuperior, true);
         }
 
         float altoInferior = getAltoInferior();
-
         if (altoInferior > 0.0f) {
-            dibujarTuberiaPixel(
-                    x,
-                    getYCentroInferior(),
-                    ancho,
-                    altoInferior,
-                    false);
+            dibujarBloqueTuberia(x, getYCentroInferior(), ancho, altoInferior, false);
         }
     }
 
-    private void dibujarTuberiaPixel(float x, float yCentro, float ancho, float alto, boolean esSuperior) {
-        float borde = ancho * 0.055f;
+    private void dibujarBloqueTuberia(float cx, float cy, float bloqueAncho, float bloqueAlto, boolean superior) {
+        float pixelX = bloqueAncho / CUERPO_COLUMNAS;
+        int filas = Math.max(6, Math.round(bloqueAlto / pixelX));
+        float pixelY = bloqueAlto / filas;
 
+        Sprite cuerpo = crearSpriteCuerpo(filas);
+
+        float left = cx - bloqueAncho * 0.5f;
+        float top = cy + bloqueAlto * 0.5f;
+        cuerpo.dibujar(renderizador, left, top, pixelX, pixelY);
+
+        float cabezaAlto = Math.min(0.16f, bloqueAlto * 0.35f);
+        float cabezaAncho = bloqueAncho * 1.22f;
+        float cabezaY = superior
+            ? cy - (bloqueAlto * 0.5f) + (cabezaAlto * 0.5f)
+            : cy + (bloqueAlto * 0.5f) - (cabezaAlto * 0.5f);
+        dibujarCabeza(cx, cabezaY, cabezaAncho, cabezaAlto, superior);
+    }
+
+    private void dibujarCabeza(float cx, float cy, float anchoCabeza, float altoCabeza, boolean superior) {
+        Sprite cabeza = crearSpriteCabeza(superior);
+
+        float pixelX = anchoCabeza / CABEZA_COLUMNAS;
+        float pixelY = altoCabeza / CABEZA_FILAS;
+        float left = cx - anchoCabeza * 0.5f;
+        float top = cy + altoCabeza * 0.5f;
+        cabeza.dibujar(renderizador, left, top, pixelX, pixelY);
+    }
+
+    private Sprite crearSpriteCuerpo(int filas) {
         float[] bordeOscuro = { 0.12f, 0.08f, 0.12f };
         float[] verdeOscuro = { 0.15f, 0.34f, 0.13f };
-        float[] verdeBase = { 0.30f, 0.68f, 0.25f };
-        float[] verdeClaro = { 0.55f, 0.93f, 0.40f };
-        float[] verdeMedio = { 0.24f, 0.56f, 0.20f };
-        float[] sombra = { 0.10f, 0.27f, 0.10f };
-        float[] brillo = { 0.72f, 1.00f, 0.55f };
+        float[] verdeBase = { 0.34f, 0.76f, 0.28f };
+        float[] verdeBaseCuerpo = { 0.30f, 0.68f, 0.25f };
+        float[] verdeClaro = { 0.65f, 1.00f, 0.45f };
+        float[] verdeMedio = { 0.28f, 0.65f, 0.24f };
+        float[] sombra = { 0.13f, 0.33f, 0.12f };
+        float[] brillo = { 0.75f, 1.00f, 0.58f };
 
-        // Borde exterior del cuerpo
-        dibujarRect(
-                x,
-                yCentro,
-                ancho,
-                alto,
-                bordeOscuro[0],
-                bordeOscuro[1],
-                bordeOscuro[2]);
-
-        // Interior verde
-        dibujarRect(
-                x,
-                yCentro,
-                ancho - borde * 2.0f,
-                alto - borde * 2.0f,
-                verdeBase[0],
-                verdeBase[1],
-                verdeBase[2]);
-
-        float altoInterior = alto - borde * 2.0f;
-
-        // Franja clara izquierda
-        dibujarRect(
-                x - ancho * 0.23f,
-                yCentro,
-                ancho * 0.16f,
-                altoInterior,
-                verdeClaro[0],
-                verdeClaro[1],
-                verdeClaro[2]);
-
-        // Franja verde media
-        dibujarRect(
-                x - ancho * 0.03f,
-                yCentro,
-                ancho * 0.22f,
-                altoInterior,
-                verdeMedio[0],
-                verdeMedio[1],
-                verdeMedio[2]);
-
-        // Sombra derecha
-        dibujarRect(
-                x + ancho * 0.25f,
-                yCentro,
-                ancho * 0.20f,
-                altoInterior,
-                sombra[0],
-                sombra[1],
-                sombra[2]);
-
-        // Línea oscura vertical
-        dibujarRect(
-                x + ancho * 0.18f,
-                yCentro,
-                ancho * 0.035f,
-                altoInterior,
-                verdeOscuro[0],
-                verdeOscuro[1],
-                verdeOscuro[2]);
-
-        // Brillo fino derecho
-        dibujarRect(
-                x + ancho * 0.43f,
-                yCentro,
-                ancho * 0.045f,
-                altoInterior,
-                brillo[0],
-                brillo[1],
-                brillo[2]);
-
-        // Cabeza de la tubería
-        float cabezaAlto = Math.min(0.16f, alto * 0.35f);
-        float cabezaAncho = ancho * 1.22f;
-
-        float cabezaY;
-
-        if (esSuperior) {
-            // La tubería superior tiene la cabeza abajo
-            cabezaY = yCentro - (alto * 0.5f) + (cabezaAlto * 0.5f);
-        } else {
-            // La tubería inferior tiene la cabeza arriba
-            cabezaY = yCentro + (alto * 0.5f) - (cabezaAlto * 0.5f);
+        Sprite cuerpo = new Sprite();
+        for (int y = 0; y < filas; y++) {
+            for (int x = 0; x < CUERPO_COLUMNAS; x++) {
+                cuerpo.agregarPixel(x, y, verdeBaseCuerpo);
+            }
         }
 
-        dibujarCabezaTuberia(
-                x,
-                cabezaY,
-                cabezaAncho,
-                cabezaAlto,
-                esSuperior);
+        cuerpo.agregarRect(0, 0, 1, filas, bordeOscuro);
+        cuerpo.agregarRect(CUERPO_COLUMNAS - 1, 0, 1, filas, bordeOscuro);
+        cuerpo.agregarRect(1, 0, 2, filas, verdeClaro);
+        cuerpo.agregarRect(3, 0, 3, filas, verdeMedio);
+        cuerpo.agregarRect(8, 0, 1, filas, verdeOscuro);
+        cuerpo.agregarRect(9, 0, 1, filas, sombra);
+        cuerpo.agregarRect(10, 0, 2, filas, brillo);
+
+        return cuerpo;
     }
 
-    private void dibujarCabezaTuberia(float x, float y, float ancho, float alto, boolean esSuperior) {
-        float borde = ancho * 0.045f;
-
+    private Sprite crearSpriteCabeza(boolean superior) {
         float[] bordeOscuro = { 0.12f, 0.08f, 0.12f };
         float[] verdeBase = { 0.34f, 0.76f, 0.28f };
         float[] verdeClaro = { 0.65f, 1.00f, 0.45f };
@@ -226,109 +117,25 @@ public class Tuberia {
         float[] sombra = { 0.13f, 0.33f, 0.12f };
         float[] brillo = { 0.75f, 1.00f, 0.58f };
 
-        // Borde exterior de la cabeza
-        dibujarRect(
-                x,
-                y,
-                ancho,
-                alto,
-                bordeOscuro[0],
-                bordeOscuro[1],
-                bordeOscuro[2]);
-
-        // Interior de la cabeza
-        dibujarRect(
-                x,
-                y,
-                ancho - borde * 2.0f,
-                alto - borde * 2.0f,
-                verdeBase[0],
-                verdeBase[1],
-                verdeBase[2]);
-
-        float altoInterior = alto - borde * 2.0f;
-
-        // Franja clara izquierda
-        dibujarRect(
-                x - ancho * 0.25f,
-                y,
-                ancho * 0.18f,
-                altoInterior,
-                verdeClaro[0],
-                verdeClaro[1],
-                verdeClaro[2]);
-
-        // Verde medio central
-        dibujarRect(
-                x - ancho * 0.02f,
-                y,
-                ancho * 0.25f,
-                altoInterior,
-                verdeMedio[0],
-                verdeMedio[1],
-                verdeMedio[2]);
-
-        // Sombra derecha
-        dibujarRect(
-                x + ancho * 0.27f,
-                y,
-                ancho * 0.18f,
-                altoInterior,
-                sombra[0],
-                sombra[1],
-                sombra[2]);
-
-        // Brillo fino derecho
-        dibujarRect(
-                x + ancho * 0.44f,
-                y,
-                ancho * 0.04f,
-                altoInterior,
-                brillo[0],
-                brillo[1],
-                brillo[2]);
-
-        // Línea horizontal de brillo
-        float lineaY;
-
-        if (esSuperior) {
-            lineaY = y - alto * 0.34f;
-        } else {
-            lineaY = y + alto * 0.34f;
+        Sprite cabeza = new Sprite();
+        for (int y = 0; y < CABEZA_FILAS; y++) {
+            for (int x = 0; x < CABEZA_COLUMNAS; x++) {
+                cabeza.agregarPixel(x, y, verdeBase);
+            }
         }
 
-        dibujarRect(
-                x - ancho * 0.18f,
-                lineaY,
-                ancho * 0.55f,
-                alto * 0.08f,
-                brillo[0],
-                brillo[1],
-                brillo[2]);
+        cabeza.agregarRect(0, 0, 1, CABEZA_FILAS, bordeOscuro);
+        cabeza.agregarRect(CABEZA_COLUMNAS - 1, 0, 1, CABEZA_FILAS, bordeOscuro);
+        cabeza.agregarRect(1, 0, 2, CABEZA_FILAS, verdeClaro);
+        cabeza.agregarRect(3, 0, 4, CABEZA_FILAS, verdeMedio);
+        cabeza.agregarRect(9, 0, 2, CABEZA_FILAS, sombra);
+        cabeza.agregarRect(11, 0, 2, CABEZA_FILAS, brillo);
 
-        // Línea oscura inferior/superior para efecto pixelado
-        float lineaOscuraY;
+        int filaBrillo = superior ? 2 : 1;
+        int filaSombra = superior ? 1 : 2;
+        cabeza.agregarRect(3, filaBrillo, 8, 1, brillo);
+        cabeza.agregarRect(1, filaSombra, 12, 1, bordeOscuro);
 
-        if (esSuperior) {
-            lineaOscuraY = y + alto * 0.42f;
-        } else {
-            lineaOscuraY = y - alto * 0.42f;
-        }
-
-        dibujarRect(
-                x,
-                lineaOscuraY,
-                ancho * 0.90f,
-                alto * 0.06f,
-                bordeOscuro[0],
-                bordeOscuro[1],
-                bordeOscuro[2]);
-    }
-
-    private void dibujarRect(float x, float y, float ancho, float alto, float r, float g, float b) {
-        GL20.glUniform2f(ubicacionOffset, x, y);
-        GL20.glUniform2f(ubicacionEscala, ancho, alto);
-        GL20.glUniform3f(ubicacionColor, r, g, b);
-        GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 6);
+        return cabeza;
     }
 }
