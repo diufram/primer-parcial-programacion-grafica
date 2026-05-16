@@ -128,6 +128,7 @@ public class AppFlappyBird {
             juego.saltoJugador2();
         }
 
+        // Tecla del tercer jugador.
         if (!juego.estaJuegoTerminado() && sePresiono(GLFW.GLFW_KEY_I)) {
             juego.saltoJugador3();
         }

@@ -21,11 +21,13 @@ public class Juego {
 
     private Pajaro jugador1;
     private Pajaro jugador2;
+    // Tercer jugador local.
     private Pajaro jugador3;
     private GameOver gameOver;
     private FondoOscuro fondoOscuro;
     private int puntajeJugador1;
     private int puntajeJugador2;
+    // Puntaje acumulado del tercer jugador.
     private int puntajeJugador3;
     private float temporizadorSpawn;
     private float velocidadTuberias;
@@ -117,6 +119,7 @@ public class Juego {
         gestorAudio.reproducirSalto();
     }
 
+    // Salto del tercer jugador.
     public void saltoJugador3() {
         if (!iniciado && !finJuego) {
             iniciado = true;
@@ -172,12 +175,7 @@ public class Juego {
         }
 
         if (!jugador1.estaVivo() && !jugador2.estaVivo() && !jugador3.estaVivo()) {
-            finJuego = true;
-            juegoTerminado = true;
-            fondoOscuro.setVisible(true);
-            gameOver.setVisible(true);
-            fondoOscuro.setAlpha(Constantes.ALPHA_FONDO_OSCURO);
-            gameOver.setAlpha(1.0f);
+            finalizarJuego();
             gestorAudio.reproducirMuerte();
             return;
         }
@@ -197,16 +195,31 @@ public class Juego {
                 puntajeJugador1++;
                 gestorAudio.reproducirPunto();
                 actualizarDificultad();
+                // Finaliza la partida cuando alguien alcanza el puntaje objetivo.
+                if (llegoAlPuntajeObjetivo()) {
+                    finalizarJuego();
+                    return;
+                }
             }
             if (p.pasoPorX(Constantes.BIRD_X_PLAYER2, 2) && jugador2.estaVivo()) {
                 puntajeJugador2++;
                 gestorAudio.reproducirPunto();
                 actualizarDificultad();
+                // Finaliza la partida cuando alguien alcanza el puntaje objetivo.
+                if (llegoAlPuntajeObjetivo()) {
+                    finalizarJuego();
+                    return;
+                }
             }
             if (p.pasoPorX(Constantes.BIRD_X_PLAYER3, 3) && jugador3.estaVivo()) {
                 puntajeJugador3++;
                 gestorAudio.reproducirPunto();
                 actualizarDificultad();
+                // Finaliza la partida cuando alguien alcanza el puntaje objetivo.
+                if (llegoAlPuntajeObjetivo()) {
+                    finalizarJuego();
+                    return;
+                }
             }
 
             if (jugador1.estaVivo() && colisionPajaroTuberia(jugador1, p)) {
@@ -277,6 +290,22 @@ public class Juego {
         for (Tuberia tuberia : tuberias) {
             tuberia.setVelocidad(velocidadTuberias);
         }
+    }
+
+    // Verifica si cualquier jugador llego al puntaje objetivo.
+    private boolean llegoAlPuntajeObjetivo() {
+        return puntajeJugador1 >= Constantes.PUNTAJE_OBJETIVO
+                || puntajeJugador2 >= Constantes.PUNTAJE_OBJETIVO
+                || puntajeJugador3 >= Constantes.PUNTAJE_OBJETIVO;
+    }
+
+    private void finalizarJuego() {
+        finJuego = true;
+        juegoTerminado = true;
+        fondoOscuro.setVisible(true);
+        gameOver.setVisible(true);
+        fondoOscuro.setAlpha(Constantes.ALPHA_FONDO_OSCURO);
+        gameOver.setAlpha(1.0f);
     }
 
     public int getPuntajeJugador1() {
