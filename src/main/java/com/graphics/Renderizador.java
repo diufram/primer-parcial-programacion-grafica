@@ -67,7 +67,8 @@ public class Renderizador {
         GL20.glLinkProgram(programaTextura);
 
         if (GL20.glGetProgrami(programaTextura, GL20.GL_LINK_STATUS) == GL11.GL_FALSE) {
-            throw new RuntimeException("Error al enlazar programa textura: " + GL20.glGetProgramInfoLog(programaTextura));
+            throw new RuntimeException(
+                    "Error al enlazar programa textura: " + GL20.glGetProgramInfoLog(programaTextura));
         }
 
         ubicacionSampler = GL20.glGetUniformLocation(programaTextura, "uTexture");
@@ -152,9 +153,9 @@ public class Renderizador {
     }
 
     private void dibujarParte(Parte parte, float parentX, float parentY, float parentRotacion,
-                              float parentEscala, float[] colorHeredado) {
+            float parentEscala, float[] colorHeredado) {
         if ((texturasHabilitadas && !parte.isVisibleConTextura())
-            || (!texturasHabilitadas && !parte.isVisibleSinTextura())) {
+                || (!texturasHabilitadas && !parte.isVisibleSinTextura())) {
             return;
         }
 
@@ -164,11 +165,12 @@ public class Renderizador {
         float rotacionMundo = parentRotacion + parte.getRotacion();
         float escalaMundo = parentEscala * parte.getEscala();
         float[] colorParte = parte.getColor() != null ? parte.getColor() : colorHeredado;
-        float[] offsetPivote = transformar(parte.getPivoteX() * escalaMundo, parte.getPivoteY() * escalaMundo, rotacionMundo);
+        float[] offsetPivote = transformar(parte.getPivoteX() * escalaMundo, parte.getPivoteY() * escalaMundo,
+                rotacionMundo);
         float pivoteMundoX = origenX + offsetPivote[0];
         float pivoteMundoY = origenY + offsetPivote[1];
 
-        boolean esSprite = parte instanceof ParteSprite;
+        boolean esSprite = parte.usaTextura();
         if (parte.getPuntos().size() >= 3 && (colorParte != null || esSprite)) {
             List<Punto> puntosMundo = new ArrayList<>();
             for (Punto punto : parte.getPuntos()) {
@@ -178,15 +180,10 @@ public class Renderizador {
                 puntosMundo.add(new Punto(pivoteMundoX + transformado[0], pivoteMundoY + transformado[1]));
             }
             if (esSprite) {
-                ParteSprite parteSprite = (ParteSprite) parte;
-                dibujarSprite(parteSprite, puntosMundo);
+                dibujarSprite(parte, puntosMundo);
             } else {
                 dibujarPoligono(puntosMundo, colorParte);
             }
-        }
-
-        for (Parte subparte : parte.getSubpartes()) {
-            dibujarParte(subparte, origenX, origenY, rotacionMundo, escalaMundo, colorParte);
         }
     }
 
@@ -221,17 +218,17 @@ public class Renderizador {
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertices.length / 2);
     }
 
-    private void dibujarSprite(ParteSprite parteSprite, List<Punto> puntos) {
+    private void dibujarSprite(Parte parte, List<Punto> puntos) {
         if (puntos.size() != 4) {
             return;
         }
 
         if (!texturasHabilitadas) {
-            dibujarPoligono(puntos, parteSprite.getColor());
+            dibujarPoligono(puntos, parte.getColor());
             return;
         }
 
-        int textura = obtenerTextura(parteSprite.getRutaTextura());
+        int textura = obtenerTextura(parte.getRutaTextura());
         GL20.glUseProgram(programaTextura);
         GL30.glBindVertexArray(vaoTextura);
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -239,12 +236,12 @@ public class Renderizador {
         GL20.glUniform1i(ubicacionSampler, 0);
 
         float[] vertices = {
-            puntos.get(0).getX(), puntos.get(0).getY(), 0.0f, 0.0f,
-            puntos.get(1).getX(), puntos.get(1).getY(), 1.0f, 0.0f,
-            puntos.get(2).getX(), puntos.get(2).getY(), 1.0f, 1.0f,
-            puntos.get(0).getX(), puntos.get(0).getY(), 0.0f, 0.0f,
-            puntos.get(2).getX(), puntos.get(2).getY(), 1.0f, 1.0f,
-            puntos.get(3).getX(), puntos.get(3).getY(), 0.0f, 1.0f
+                puntos.get(0).getX(), puntos.get(0).getY(), 0.0f, 0.0f,
+                puntos.get(1).getX(), puntos.get(1).getY(), 1.0f, 0.0f,
+                puntos.get(2).getX(), puntos.get(2).getY(), 1.0f, 1.0f,
+                puntos.get(0).getX(), puntos.get(0).getY(), 0.0f, 0.0f,
+                puntos.get(2).getX(), puntos.get(2).getY(), 1.0f, 1.0f,
+                puntos.get(3).getX(), puntos.get(3).getY(), 0.0f, 1.0f
         };
 
         FloatBuffer buffer = BufferUtils.createFloatBuffer(vertices.length);
@@ -290,7 +287,8 @@ public class Renderizador {
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, ancho, alto, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, ancho, alto, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE,
+                    buffer);
 
             texturas.put(rutaTextura, id);
             return id;
@@ -303,8 +301,8 @@ public class Renderizador {
         float cos = (float) Math.cos(rotacion);
         float sin = (float) Math.sin(rotacion);
         return new float[] {
-            x * cos - y * sin,
-            x * sin + y * cos
+                x * cos - y * sin,
+                x * sin + y * cos
         };
     }
 

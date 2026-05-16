@@ -14,7 +14,7 @@ public class GeneradorFondo {
         ObjetoEscena objeto = new ObjetoEscena();
         Parte cieloPoligonal = rectangulo(0.0f, 0.0f, 2.0f, 2.0f, Constantes.COLOR_CIELO);
         cieloPoligonal.setVisibleConTextura(false);
-        ParteSprite cieloSprite = new ParteSprite("/sprites/background-day.png", 2.0f, 2.0f, Constantes.COLOR_CIELO);
+        Parte cieloSprite = crearParteTextura("/sprites/background-day.png", 2.0f, 2.0f, Constantes.COLOR_CIELO);
         objeto.agregarParte(cieloPoligonal);
         objeto.agregarParte(cieloSprite);
         return objeto;
@@ -28,7 +28,7 @@ public class GeneradorFondo {
         Parte cesped = rectangulo(0.0f, 0.0f, 2.0f, 0.10f, Constantes.COLOR_CESPED);
         cesped.setY(Constantes.Y_CESPED);
         cesped.setVisibleConTextura(false);
-        ParteSprite base = new ParteSprite("/sprites/base.png", 2.25f, 0.28f, Constantes.COLOR_SUELO);
+        Parte base = crearParteTextura("/sprites/base.png", 2.25f, 0.28f, Constantes.COLOR_SUELO);
         base.setY(-0.86f);
         objeto.agregarParte(suelo);
         objeto.agregarParte(cesped);
@@ -75,6 +75,14 @@ public class GeneradorFondo {
             .agregarPunto(centroX + medioAncho, centroY + medioAlto)
             .agregarPunto(centroX + medioAncho, centroY - medioAlto)
             .agregarPunto(centroX - medioAncho, centroY - medioAlto);
+        return parte;
+    }
+
+    private Parte crearParteTextura(String rutaTextura, float ancho, float alto, float[] colorRespaldo) {
+        Parte parte = new Parte(colorRespaldo);
+        parte.setRutaTextura(rutaTextura);
+        parte.setVisibleSinTextura(false);
+        parte.definirRectangulo(ancho, alto);
         return parte;
     }
 

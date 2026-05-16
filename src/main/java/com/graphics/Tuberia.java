@@ -75,11 +75,11 @@ public class Tuberia {
         Parte respaldoInferior = crearRectangulo(0.0f, centroInferiorLocal, ancho, altoInferior, Constantes.COLOR_TUBERIA);
         respaldoInferior.setVisibleConTextura(false);
 
-        ParteSprite superior = new ParteSprite("/sprites/pipe-green.png", ancho * 1.55f, altoSuperior, Constantes.COLOR_TUBERIA);
+        Parte superior = crearParteTextura("/sprites/pipe-green.png", ancho * 1.55f, altoSuperior, Constantes.COLOR_TUBERIA);
         superior.setY(centroSuperiorLocal);
         superior.setRotacion((float) Math.PI);
 
-        ParteSprite inferior = new ParteSprite("/sprites/pipe-green.png", ancho * 1.55f, altoInferior, Constantes.COLOR_TUBERIA);
+        Parte inferior = crearParteTextura("/sprites/pipe-green.png", ancho * 1.55f, altoInferior, Constantes.COLOR_TUBERIA);
         inferior.setY(centroInferiorLocal);
 
         objeto.agregarParte(respaldoSuperior);
@@ -96,6 +96,14 @@ public class Tuberia {
             .agregarPunto(centroX + medioAncho, centroY + medioAlto)
             .agregarPunto(centroX + medioAncho, centroY - medioAlto)
             .agregarPunto(centroX - medioAncho, centroY - medioAlto);
+        return parte;
+    }
+
+    private Parte crearParteTextura(String rutaTextura, float ancho, float alto, float[] colorRespaldo) {
+        Parte parte = new Parte(colorRespaldo);
+        parte.setRutaTextura(rutaTextura);
+        parte.setVisibleSinTextura(false);
+        parte.definirRectangulo(ancho, alto);
         return parte;
     }
 }

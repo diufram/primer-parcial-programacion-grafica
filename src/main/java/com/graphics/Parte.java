@@ -5,7 +5,6 @@ import java.util.List;
 
 public class Parte {
     private final List<Punto> puntos;
-    private final List<Parte> subpartes;
     private float x;
     private float y;
     private float pivoteX;
@@ -13,12 +12,12 @@ public class Parte {
     private float rotacion;
     private float escala;
     private float[] color;
+    private String rutaTextura;
     private boolean visibleConTextura;
     private boolean visibleSinTextura;
 
     public Parte(float[] color) {
         this.puntos = new ArrayList<>();
-        this.subpartes = new ArrayList<>();
         this.color = color;
         this.escala = 1.0f;
         this.visibleConTextura = true;
@@ -30,17 +29,19 @@ public class Parte {
         return this;
     }
 
-    public Parte agregarSubparte(Parte parte) {
-        subpartes.add(parte);
+    public Parte definirRectangulo(float ancho, float alto) {
+        puntos.clear();
+        float medioAncho = ancho * 0.5f;
+        float medioAlto = alto * 0.5f;
+        agregarPunto(-medioAncho, medioAlto)
+            .agregarPunto(medioAncho, medioAlto)
+            .agregarPunto(medioAncho, -medioAlto)
+            .agregarPunto(-medioAncho, -medioAlto);
         return this;
     }
 
     public List<Punto> getPuntos() {
         return puntos;
-    }
-
-    public List<Parte> getSubpartes() {
-        return subpartes;
     }
 
     public float getX() {
@@ -102,6 +103,18 @@ public class Parte {
 
     public void setColor(float[] color) {
         this.color = color;
+    }
+
+    public String getRutaTextura() {
+        return rutaTextura;
+    }
+
+    public void setRutaTextura(String rutaTextura) {
+        this.rutaTextura = rutaTextura;
+    }
+
+    public boolean usaTextura() {
+        return rutaTextura != null && !rutaTextura.isBlank();
     }
 
     public boolean isVisibleConTextura() {

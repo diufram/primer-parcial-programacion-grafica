@@ -2,7 +2,7 @@ package com.graphics;
 
 public class Pajaro {
     private final ObjetoEscena objeto;
-    private final ParteSprite sprite;
+    private final Parte sprite;
     private final Parte alaRespaldo;
     private final float xInicial;
     private final float gravedad;
@@ -113,8 +113,11 @@ public class Pajaro {
         return y + (alto * 0.5f) >= Constantes.LIMITE_ARRIBA;
     }
 
-    private ParteSprite crearSprite(float[] colorBase, float ancho, float alto) {
-        ParteSprite parte = new ParteSprite(resolverRutaPajaro(colorBase, "midflap"), ancho * 1.45f, alto * 1.15f, colorBase);
+    private Parte crearSprite(float[] colorBase, float ancho, float alto) {
+        Parte parte = new Parte(colorBase);
+        parte.setRutaTextura(resolverRutaPajaro(colorBase, "midflap"));
+        parte.setVisibleSinTextura(false);
+        parte.definirRectangulo(ancho * 1.45f, alto * 1.15f);
         parte.setPivote(0.0f, 0.0f);
         return parte;
     }
