@@ -31,6 +31,7 @@ public class Pajaro extends Objeto {
         this.alaRespaldo = crearAla(color);
 
         agregarParte(crearCuerpo(color));
+        agregarParte(crearCola(color));
         agregarParte(alaRespaldo);
         agregarParte(crearPico());
         agregarParte(crearOjo());
@@ -148,6 +149,20 @@ public class Pajaro extends Objeto {
                 .agregarPunto(0.010f, -0.028f)
                 .agregarPunto(-0.018f, -0.018f);
         return parte;
+    }
+
+    private Parte crearCola(float[] colorBase) {
+        float[] colorCola = {
+                Math.max(0.0f, colorBase[0] - 0.12f),
+                Math.max(0.0f, colorBase[1] - 0.12f),
+                Math.max(0.0f, colorBase[2] - 0.08f)
+        };
+        Parte cola = new Parte(colorCola);
+        cola.setVisibleConTextura(false);
+        cola.agregarPunto(-0.044f, 0.008f)
+                .agregarPunto(-0.074f, -0.002f)
+                .agregarPunto(-0.044f, -0.014f);
+        return cola;
     }
 
     private Parte crearPico() {
