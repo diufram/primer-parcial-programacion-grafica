@@ -21,10 +21,12 @@ public class Juego {
 
     private Pajaro jugador1;
     private Pajaro jugador2;
+    private Pajaro jugador3;
     private GameOver gameOver;
     private FondoOscuro fondoOscuro;
     private int puntajeJugador1;
     private int puntajeJugador2;
+    private int puntajeJugador3;
     private float temporizadorSpawn;
     private float velocidadTuberias;
     private float tiempoEntreTuberias;
@@ -64,8 +66,18 @@ public class Juego {
             jugador2.reiniciar(0.0f);
         }
 
+        if (jugador3 == null) {
+            jugador3 = new Pajaro(Constantes.BIRD_X_PLAYER3, 0.0f, Constantes.GRAVEDAD,
+                    Constantes.IMPULSO_SALTO, Constantes.VELOCIDAD_MAX_CAIDA,
+                    Constantes.BIRD_ANCHO, Constantes.BIRD_ALTO, Constantes.COLOR_JUGADOR3);
+            escenario.agregarObjeto(jugador3);
+        } else {
+            jugador3.reiniciar(0.0f);
+        }
+
         puntajeJugador1 = 0;
         puntajeJugador2 = 0;
+        puntajeJugador3 = 0;
         temporizadorSpawn = 0.0f;
         velocidadTuberias = Constantes.VELOCIDAD_TUBERIAS_INICIAL;
         tiempoEntreTuberias = Constantes.TIEMPO_ENTRE_TUBERIAS_INICIAL;
@@ -105,12 +117,26 @@ public class Juego {
         gestorAudio.reproducirSalto();
     }
 
+    public void saltoJugador3() {
+        if (!iniciado && !finJuego) {
+            iniciado = true;
+        }
+        if (finJuego && !jugador3.estaVivo()) {
+            reiniciar();
+            iniciado = true;
+            gestorAudio.reproducirTransicion();
+        }
+        jugador3.saltar();
+        gestorAudio.reproducirSalto();
+    }
+
     public void actualizar(float dt) {
         if (!iniciado || juegoTerminado)
             return;
 
         jugador1.actualizar(dt);
         jugador2.actualizar(dt);
+        jugador3.actualizar(dt);
 
         if (jugador1.estaVivo()) {
             if (jugador1.colisionaTecho()) {
@@ -134,7 +160,18 @@ public class Juego {
             }
         }
 
-        if (!jugador1.estaVivo() && !jugador2.estaVivo()) {
+        if (jugador3.estaVivo()) {
+            if (jugador3.colisionaTecho()) {
+                jugador3.setVivo(false);
+                gestorAudio.reproducirGolpe();
+            }
+            if (jugador3.colisionaSuelo()) {
+                jugador3.setVivo(false);
+                gestorAudio.reproducirGolpe();
+            }
+        }
+
+        if (!jugador1.estaVivo() && !jugador2.estaVivo() && !jugador3.estaVivo()) {
             finJuego = true;
             juegoTerminado = true;
             fondoOscuro.setVisible(true);
@@ -166,6 +203,11 @@ public class Juego {
                 gestorAudio.reproducirPunto();
                 actualizarDificultad();
             }
+            if (p.pasoPorX(Constantes.BIRD_X_PLAYER3, 3) && jugador3.estaVivo()) {
+                puntajeJugador3++;
+                gestorAudio.reproducirPunto();
+                actualizarDificultad();
+            }
 
             if (jugador1.estaVivo() && colisionPajaroTuberia(jugador1, p)) {
                 jugador1.setVivo(false);
@@ -173,6 +215,10 @@ public class Juego {
             }
             if (jugador2.estaVivo() && colisionPajaroTuberia(jugador2, p)) {
                 jugador2.setVivo(false);
+                gestorAudio.reproducirGolpe();
+            }
+            if (jugador3.estaVivo() && colisionPajaroTuberia(jugador3, p)) {
+                jugador3.setVivo(false);
                 gestorAudio.reproducirGolpe();
             }
 
@@ -215,7 +261,7 @@ public class Juego {
     }
 
     private void actualizarDificultad() {
-        int puntajeMaximo = Math.max(puntajeJugador1, puntajeJugador2);
+        int puntajeMaximo = Math.max(puntajeJugador1, Math.max(puntajeJugador2, puntajeJugador3));
         nivel = (puntajeMaximo / 5) + 1;
         if (nivel > 10)
             nivel = 10;
@@ -239,6 +285,10 @@ public class Juego {
 
     public int getPuntajeJugador2() {
         return puntajeJugador2;
+    }
+
+    public int getPuntajeJugador3() {
+        return puntajeJugador3;
     }
 
     public boolean estaJuegoTerminado() {

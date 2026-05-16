@@ -9,6 +9,7 @@ public class Tuberia extends Objeto {
     private final float gapAlto;
     private boolean puntuadaJugador1;
     private boolean puntuadaJugador2;
+    private boolean puntuadaJugador3;
     private final float ancho;
     private float velocidad;
 
@@ -18,6 +19,7 @@ public class Tuberia extends Objeto {
         this.ancho = ancho;
         this.puntuadaJugador1 = false;
         this.puntuadaJugador2 = false;
+        this.puntuadaJugador3 = false;
         this.velocidad = 0.62f;
         setX(x);
         setY(gapCentroY);
@@ -51,12 +53,14 @@ public class Tuberia extends Objeto {
     }
 
     public boolean pasoPorX(float birdX, int jugador) {
-        boolean yaPuntuada = jugador == 1 ? puntuadaJugador1 : puntuadaJugador2;
+        boolean yaPuntuada = jugador == 1 ? puntuadaJugador1 : (jugador == 2 ? puntuadaJugador2 : puntuadaJugador3);
         if (x + (ancho * 0.5f) < birdX && !yaPuntuada) {
             if (jugador == 1) {
                 puntuadaJugador1 = true;
-            } else {
+            } else if (jugador == 2) {
                 puntuadaJugador2 = true;
+            } else {
+                puntuadaJugador3 = true;
             }
             return true;
         }

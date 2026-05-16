@@ -24,6 +24,7 @@ public class AppFlappyBird {
     private boolean espacioAnterior;
     private boolean wAnterior;
     private boolean arribaAnterior;
+    private boolean iAnterior;
     private boolean rAnterior;
     private boolean enterAnterior;
     private boolean tabAnterior;
@@ -50,7 +51,7 @@ public class AppFlappyBird {
         ventana = GLFW.glfwCreateWindow(
             Constantes.ANCHO_VENTANA,
             Constantes.ALTO_VENTANA,
-            "Flappy Bird - 2 Jugadores",
+            "Flappy Bird - 3 Jugadores",
             0, 0
         );
 
@@ -127,6 +128,10 @@ public class AppFlappyBird {
             juego.saltoJugador2();
         }
 
+        if (!juego.estaJuegoTerminado() && sePresiono(GLFW.GLFW_KEY_I)) {
+            juego.saltoJugador3();
+        }
+
         if (juego.estaJuegoTerminado() && (sePresiono(GLFW.GLFW_KEY_ENTER) || sePresiono(GLFW.GLFW_KEY_R))) {
             reiniciarJuego();
         }
@@ -143,14 +148,15 @@ public class AppFlappyBird {
     }
 
     private void actualizarTitulo() {
-        String titulo = "Escenario Poligonal 2P | P1:" + juego.getPuntajeJugador1()
+        String titulo = "Escenario Poligonal 3P | P1:" + juego.getPuntajeJugador1()
             + " P2:" + juego.getPuntajeJugador2()
+            + " P3:" + juego.getPuntajeJugador3()
             + " | Nivel:" + juego.getNivel();
 
         if (juego.estaJuegoTerminado()) {
             titulo += " | GAME OVER | SPACE/ENTER/R reinician";
         } else {
-            titulo += " | SPACE P1 | W/UP P2";
+            titulo += " | SPACE P1 | W/UP P2 | I P3";
         }
 
         titulo += renderizador.isTexturasHabilitadas() ? " | TAB:texturas on" : " | TAB:texturas off";
@@ -178,6 +184,9 @@ public class AppFlappyBird {
         } else if (tecla == GLFW.GLFW_KEY_UP) {
             anterior = arribaAnterior;
             arribaAnterior = ahora;
+        } else if (tecla == GLFW.GLFW_KEY_I) {
+            anterior = iAnterior;
+            iAnterior = ahora;
         } else if (tecla == GLFW.GLFW_KEY_R) {
             anterior = rAnterior;
             rAnterior = ahora;

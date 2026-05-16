@@ -10,6 +10,7 @@ public class Constantes {
 
     public static final float[] COLOR_JUGADOR1 = {0.97f, 0.84f, 0.20f};
     public static final float[] COLOR_JUGADOR2 = {0.25f, 0.55f, 0.95f};
+    public static final float[] COLOR_JUGADOR3 = {0.95f, 0.32f, 0.30f};
     public static final float[] COLOR_CIELO = {0.56f, 0.84f, 0.98f};
     public static final float[] COLOR_SUELO = {0.71f, 0.50f, 0.23f};
     public static final float[] COLOR_CESPED = {0.34f, 0.76f, 0.22f};
@@ -24,6 +25,7 @@ public class Constantes {
     public static final float BIRD_ALTO = 0.10f;
     public static final float BIRD_X_PLAYER1 = -0.45f;
     public static final float BIRD_X_PLAYER2 = -0.30f;
+    public static final float BIRD_X_PLAYER3 = -0.15f;
     public static final float GAP_MIN_CENTRO = -0.45f;
     public static final float GAP_MAX_CENTRO = 0.45f;
     public static final float PIPE_ANCHO = 0.18f;
