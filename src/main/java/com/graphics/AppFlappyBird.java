@@ -7,15 +7,15 @@ public class AppFlappyBird {
 
     private long ventana;
     private Renderizador renderizador;
-    private GeneradorFondo generadorFondo;
-    private GeneradorUI generadorUI;
+    private Escenario escenario;
     private Juego juego;
-    private Entrada entrada;
-    private Sonido sonido;
-
-    private static final int ESTADO_INICIO = 0;
-    private static final int ESTADO_JUGANDO = 1;
-    private static final int ESTADO_GAME_OVER = 2;
+    private GestorAudio gestorAudio;
+    private boolean espacioAnterior;
+    private boolean wAnterior;
+    private boolean arribaAnterior;
+    private boolean rAnterior;
+    private boolean enterAnterior;
+    private boolean tabAnterior;
 
     public void ejecutar() {
         inicializar();
@@ -53,11 +53,10 @@ public class AppFlappyBird {
         GL.createCapabilities();
 
         renderizador = new Renderizador();
-        generadorFondo = new GeneradorFondo(renderizador);
-        generadorUI = new GeneradorUI(renderizador);
-        juego = new Juego(renderizador);
-        entrada = new Entrada(ventana);
-        sonido = new Sonido();
+        gestorAudio = new GestorAudio();
+        escenario = new Escenario();
+        new GeneradorFondo(escenario);
+        juego = new Juego(escenario, gestorAudio);
     }
 
     private void bucleJuego() {
@@ -78,99 +77,95 @@ public class AppFlappyBird {
     }
 
     private void procesarEntrada() {
-        if (entrada.estaPresionadoEscape()) {
+        if (GLFW.glfwGetKey(ventana, GLFW.GLFW_KEY_ESCAPE) == GLFW.GLFW_PRESS) {
             GLFW.glfwSetWindowShouldClose(ventana, true);
             return;
         }
 
-        int estado = generadorUI.getEstadoJuego();
-
-        if (estado == ESTADO_INICIO) {
-            if (entrada.sePresionoEnter()) {
-                iniciarJuego();
-            }
-        } else if (estado == ESTADO_JUGANDO) {
-            if (entrada.sePresionoEspacio()) {
-                juego.saltoJugador1();
-                sonido.reproducirSalto();
-            }
-            if (entrada.saltoJugador2()) {
-                juego.saltoJugador2();
-                sonido.reproducirSalto();
-            }
-        } else if (estado == ESTADO_GAME_OVER) {
-            if (entrada.sePresionoEspacio() || entrada.sePresionoEnter() || entrada.sePresionoR()) {
+        if (sePresiono(GLFW.GLFW_KEY_SPACE)) {
+            if (juego.estaJuegoTerminado()) {
                 reiniciarJuego();
+            } else {
+                juego.saltoJugador1();
             }
         }
-    }
 
-    private void iniciarJuego() {
-        generadorUI.establecerEstado(ESTADO_JUGANDO);
-        juego.saltoJugador1();
-        sonido.reproducirSalto();
+        if (sePresiono(GLFW.GLFW_KEY_TAB)) {
+            renderizador.alternarTexturas();
+        }
+
+        if (!juego.estaJuegoTerminado() && (sePresiono(GLFW.GLFW_KEY_W) || sePresiono(GLFW.GLFW_KEY_UP))) {
+            juego.saltoJugador2();
+        }
+
+        if (juego.estaJuegoTerminado() && (sePresiono(GLFW.GLFW_KEY_ENTER) || sePresiono(GLFW.GLFW_KEY_R))) {
+            reiniciarJuego();
+        }
     }
 
     private void reiniciarJuego() {
         juego.reiniciar();
-        generadorUI.establecerEstado(ESTADO_INICIO);
-        generadorUI.establecerPuntajes(0, 0);
-        generadorUI.establecerNivel(1);
+        gestorAudio.reproducirTransicion();
     }
 
     private void actualizar(float dt) {
-        generadorUI.actualizar(dt);
-        if (generadorUI.getEstadoJuego() != ESTADO_JUGANDO) return;
-
         juego.actualizar(dt);
-
-        generadorUI.establecerPuntajes(juego.getPuntajeJugador1(), juego.getPuntajeJugador2());
-        generadorUI.establecerNivel(juego.getNivel());
-
-        if (juego.estaJuegoTerminado()) {
-            generadorUI.establecerEstado(ESTADO_GAME_OVER);
-            generadorUI.establecerJuegoTerminado(true);
-            sonido.reproducirFinJuego();
-        }
-
         actualizarTitulo();
     }
 
     private void renderizar() {
-        renderizador.usarPrograma();
-        generadorFondo.dibujar();
-        juego.dibujarTuberias();
-        int estado = generadorUI.getEstadoJuego();
-        if (estado == ESTADO_INICIO) {
-            generadorUI.dibujar();
-            juego.dibujarJugadores();
-            return;
-        }
-
-        juego.dibujarJugadores();
-        generadorUI.dibujar();
+        renderizador.prepararFrame();
+        escenario.dibujar(renderizador);
     }
 
     private void actualizarTitulo() {
-        String titulo = "Flappy Bird 2P | P1:" + juego.getPuntajeJugador1()
+        String titulo = "Escenario Poligonal 2P | P1:" + juego.getPuntajeJugador1()
             + " P2:" + juego.getPuntajeJugador2()
             + " | Nivel:" + juego.getNivel();
 
-        int estado = generadorUI.getEstadoJuego();
-        if (estado == ESTADO_INICIO) {
-            titulo += " | ENTER para jugar";
-        } else if (estado == ESTADO_GAME_OVER) {
-            titulo += " | GAME OVER";
+        if (juego.estaJuegoTerminado()) {
+            titulo += " | GAME OVER | SPACE/ENTER/R reinician";
+        } else {
+            titulo += " | SPACE P1 | W/UP P2";
         }
+
+        titulo += renderizador.isTexturasHabilitadas() ? " | TAB:texturas on" : " | TAB:texturas off";
 
         GLFW.glfwSetWindowTitle(ventana, titulo);
     }
 
     private void limpiar() {
-        sonido.limpiar();
+        gestorAudio.limpiar();
         renderizador.limpiar();
         GLFW.glfwDestroyWindow(ventana);
         GLFW.glfwTerminate();
+    }
+
+    private boolean sePresiono(int tecla) {
+        boolean ahora = GLFW.glfwGetKey(ventana, tecla) == GLFW.GLFW_PRESS;
+        boolean anterior;
+
+        if (tecla == GLFW.GLFW_KEY_SPACE) {
+            anterior = espacioAnterior;
+            espacioAnterior = ahora;
+        } else if (tecla == GLFW.GLFW_KEY_W) {
+            anterior = wAnterior;
+            wAnterior = ahora;
+        } else if (tecla == GLFW.GLFW_KEY_UP) {
+            anterior = arribaAnterior;
+            arribaAnterior = ahora;
+        } else if (tecla == GLFW.GLFW_KEY_R) {
+            anterior = rAnterior;
+            rAnterior = ahora;
+        } else if (tecla == GLFW.GLFW_KEY_TAB) {
+            anterior = tabAnterior;
+            tabAnterior = ahora;
+        } else {
+            anterior = enterAnterior;
+            enterAnterior = ahora;
+        }
+
+        return ahora && !anterior;
     }
 
     public static void main(String[] args) {

@@ -20,6 +20,8 @@ public class Juego {
     private final float gapMaxCentro;
     private final float pipeAncho;
     private final float gapAlto;
+    private final Escenario escenario;
+    private final GestorAudio gestorAudio;
 
     private Pajaro jugador1;
     private Pajaro jugador2;
@@ -33,27 +35,36 @@ public class Juego {
     private boolean finJuego;
     private boolean juegoTerminado;
 
-    private final Renderizador renderizador;
-
-    public Juego(Renderizador renderizador) {
+    public Juego(Escenario escenario, GestorAudio gestorAudio) {
         this.tuberias = new ArrayList<>();
         this.aleatorio = new Random();
         this.gapMinCentro = -0.45f;
         this.gapMaxCentro = 0.45f;
         this.pipeAncho = 0.18f;
         this.gapAlto = 0.48f;
-        this.renderizador = renderizador;
+        this.escenario = escenario;
+        this.gestorAudio = gestorAudio;
         reiniciar();
     }
 
     public void reiniciar() {
-        jugador1 = new Pajaro(BIRD_X_PLAYER1, 0.0f, GRAVEDAD, IMPULSO_SALTO,
-                           VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO,
-                           new float[]{0.98f, 0.85f, 0.20f}, renderizador);
+        limpiarTuberias();
 
-        jugador2 = new Pajaro(BIRD_X_PLAYER2, 0.0f, GRAVEDAD, IMPULSO_SALTO,
-                           VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO,
-                           new float[]{0.25f, 0.55f, 0.95f}, renderizador);
+        if (jugador1 == null) {
+            jugador1 = new Pajaro(BIRD_X_PLAYER1, 0.0f, GRAVEDAD, IMPULSO_SALTO,
+                VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO, Constantes.COLOR_JUGADOR1);
+            escenario.agregarObjeto(jugador1.getObjeto());
+        } else {
+            jugador1.reiniciar(0.0f);
+        }
+
+        if (jugador2 == null) {
+            jugador2 = new Pajaro(BIRD_X_PLAYER2, 0.0f, GRAVEDAD, IMPULSO_SALTO,
+                VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO, Constantes.COLOR_JUGADOR2);
+            escenario.agregarObjeto(jugador2.getObjeto());
+        } else {
+            jugador2.reiniciar(0.0f);
+        }
 
         puntajeJugador1 = 0;
         puntajeJugador2 = 0;
@@ -64,7 +75,6 @@ public class Juego {
         iniciado = false;
         finJuego = false;
         juegoTerminado = false;
-        tuberias.clear();
     }
 
     public void saltoJugador1() {
@@ -74,8 +84,10 @@ public class Juego {
         if (finJuego && !jugador1.estaVivo()) {
             reiniciar();
             iniciado = true;
+            gestorAudio.reproducirTransicion();
         }
         jugador1.saltar();
+        gestorAudio.reproducirSalto();
     }
 
     public void saltoJugador2() {
@@ -85,8 +97,10 @@ public class Juego {
         if (finJuego && !jugador2.estaVivo()) {
             reiniciar();
             iniciado = true;
+            gestorAudio.reproducirTransicion();
         }
         jugador2.saltar();
+        gestorAudio.reproducirSalto();
     }
 
     public void actualizar(float dt) {
@@ -98,24 +112,29 @@ public class Juego {
         if (jugador1.estaVivo()) {
             if (jugador1.colisionaTecho()) {
                 jugador1.setVivo(false);
+                gestorAudio.reproducirGolpe();
             }
             if (jugador1.colisionaSuelo()) {
                 jugador1.setVivo(false);
+                gestorAudio.reproducirGolpe();
             }
         }
 
         if (jugador2.estaVivo()) {
             if (jugador2.colisionaTecho()) {
                 jugador2.setVivo(false);
+                gestorAudio.reproducirGolpe();
             }
             if (jugador2.colisionaSuelo()) {
                 jugador2.setVivo(false);
+                gestorAudio.reproducirGolpe();
             }
         }
 
         if (!jugador1.estaVivo() && !jugador2.estaVivo()) {
             finJuego = true;
             juegoTerminado = true;
+            gestorAudio.reproducirMuerte();
             return;
         }
 
@@ -130,25 +149,28 @@ public class Juego {
             Tuberia p = it.next();
             p.actualizar(velocidadTuberias, dt);
 
-            if (p.pasoPorX(BIRD_X_PLAYER1) && jugador1.estaVivo()) {
-                p.setPuntuada(true);
+            if (p.pasoPorX(BIRD_X_PLAYER1, 1) && jugador1.estaVivo()) {
                 puntajeJugador1++;
+                gestorAudio.reproducirPunto();
                 actualizarDificultad();
             }
-            if (p.pasoPorX(BIRD_X_PLAYER2) && jugador2.estaVivo()) {
-                p.setPuntuada(true);
+            if (p.pasoPorX(BIRD_X_PLAYER2, 2) && jugador2.estaVivo()) {
                 puntajeJugador2++;
+                gestorAudio.reproducirPunto();
                 actualizarDificultad();
             }
 
             if (jugador1.estaVivo() && colisionPajaroTuberia(jugador1, p)) {
                 jugador1.setVivo(false);
+                gestorAudio.reproducirGolpe();
             }
             if (jugador2.estaVivo() && colisionPajaroTuberia(jugador2, p)) {
                 jugador2.setVivo(false);
+                gestorAudio.reproducirGolpe();
             }
 
             if (p.estaFueraDePantalla()) {
+                escenario.quitarObjeto(p.getObjeto());
                 it.remove();
             }
         }
@@ -170,7 +192,16 @@ public class Juego {
 
     private void crearTuberia() {
         float gapCentro = gapMinCentro + aleatorio.nextFloat() * (gapMaxCentro - gapMinCentro);
-        tuberias.add(new Tuberia(1.2f, gapCentro, pipeAncho, gapAlto, renderizador));
+        Tuberia tuberia = new Tuberia(1.2f, gapCentro, pipeAncho, gapAlto);
+        tuberias.add(tuberia);
+        escenario.agregarObjeto(tuberia.getObjeto());
+    }
+
+    private void limpiarTuberias() {
+        for (Tuberia tuberia : tuberias) {
+            escenario.quitarObjeto(tuberia.getObjeto());
+        }
+        tuberias.clear();
     }
 
     private void actualizarDificultad() {
@@ -183,17 +214,6 @@ public class Juego {
 
         tiempoEntreTuberias = 1.5f - (nivel - 1) * 0.08f;
         if (tiempoEntreTuberias < 0.8f) tiempoEntreTuberias = 0.8f;
-    }
-
-    public void dibujarTuberias() {
-        for (Tuberia p : tuberias) {
-            p.dibujar(0.18f, 0.70f, 0.25f);
-        }
-    }
-
-    public void dibujarJugadores() {
-        jugador1.dibujar();
-        jugador2.dibujar();
     }
 
     public int getPuntajeJugador1() { return puntajeJugador1; }

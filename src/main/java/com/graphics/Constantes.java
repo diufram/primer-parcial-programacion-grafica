@@ -1,51 +1,27 @@
 package com.graphics;
 
 public class Constantes {
-
     public static final int ANCHO_VENTANA = 900;
     public static final int ALTO_VENTANA = 700;
 
-    // ==================== COLORES PÁJARO ====================
+    public static final float LIMITE_ARRIBA = 1.0f;
+    public static final float LIMITE_ABAJO = -1.0f;
+    public static final float Y_CESPED = -0.78f;
+
     public static final float[] COLOR_JUGADOR1 = {0.97f, 0.84f, 0.20f};
     public static final float[] COLOR_JUGADOR2 = {0.25f, 0.55f, 0.95f};
+    public static final float[] COLOR_CIELO = {0.56f, 0.84f, 0.98f};
+    public static final float[] COLOR_SUELO = {0.71f, 0.50f, 0.23f};
+    public static final float[] COLOR_CESPED = {0.34f, 0.76f, 0.22f};
+    public static final float[] COLOR_NUBE = {0.96f, 0.99f, 1.00f};
+    public static final float[] COLOR_TUBERIA = {0.22f, 0.66f, 0.25f};
+    public static final float[] COLOR_TUBERIA_BORDE = {0.12f, 0.42f, 0.15f};
 
-    // ==================== COLORES UI ====================
-    public static final float[] COLOR_PANEL_TITULO = {0.05f, 0.11f, 0.20f};
-    public static final float[] COLOR_PANEL_MEDIA = {0.08f, 0.15f, 0.24f};
-    public static final float[] COLOR_PANEL_INFERIOR = {0.10f, 0.18f, 0.28f};
-    public static final float[] COLOR_GAME_OVER = {0.24f, 0.06f, 0.07f};
-    public static final float[] COLOR_GANA_P1 = {0.2f, 0.95f, 0.35f};
-    public static final float[] COLOR_GANA_P2 = {0.2f, 0.95f, 0.35f};
-
-    // ==================== TEXTOS ====================
-    public static final String TEXTO_TITULO = "FLAPPY BIRD";
-    public static final String TEXTO_2_JUGADORES = "2 JUGADORES";
-    public static final String TEXTO_P1 = "P1: ESPACIO";
-    public static final String TEXTO_P2 = "P2: W / UP";
-    public static final String TEXTO_ENTER = "ENTER PARA JUGAR";
-    public static final String TEXTO_GAME_OVER = "GAME OVER";
-    public static final String TEXTO_GANA_P1 = "GANA P1";
-    public static final String TEXTO_GANA_P2 = "GANA P2";
-    public static final String TEXTO_EMPATE = "EMPATE";
-    public static final String TEXTO_REINICIAR = "ESPACIO PARA REINICIAR";
-
-    // ==================== ANIMACIÓN ====================
-    public static final float VELOCIDAD_PULSO_UI = 4.0f;
-    public static final float AMPLITUD_PULSO_UI = 0.04f;
-
-    // ==================== POSICIONES NDC ====================
-    public static final float Y_CESPED = -0.78f;
-    public static final float Y_PANEL_INFERIOR = -0.24f;
-
-    // ==================== OFFSETS SHADERS ====================
     public static final String SHADER_VERTEX_SOURCE =
         "#version 330 core\n" +
-        "layout (location = 0) in vec3 aPos;\n" +
-        "uniform vec2 uOffset;\n" +
-        "uniform vec2 uScale;\n" +
+        "layout (location = 0) in vec2 aPos;\n" +
         "void main() {\n" +
-        "    vec2 finalPos = aPos.xy * uScale + uOffset;\n" +
-        "    gl_Position = vec4(finalPos, aPos.z, 1.0);\n" +
+        "    gl_Position = vec4(aPos, 0.0, 1.0);\n" +
         "}\n";
 
     public static final String SHADER_FRAGMENT_SOURCE =
@@ -56,5 +32,25 @@ public class Constantes {
         "    fragColor = vec4(uColor, 1.0);\n" +
         "}\n";
 
-    private Constantes() {}
+    public static final String SHADER_VERTEX_TEXTURA_SOURCE =
+        "#version 330 core\n" +
+        "layout (location = 0) in vec2 aPos;\n" +
+        "layout (location = 1) in vec2 aTexCoord;\n" +
+        "out vec2 vTexCoord;\n" +
+        "void main() {\n" +
+        "    gl_Position = vec4(aPos, 0.0, 1.0);\n" +
+        "    vTexCoord = aTexCoord;\n" +
+        "}\n";
+
+    public static final String SHADER_FRAGMENT_TEXTURA_SOURCE =
+        "#version 330 core\n" +
+        "in vec2 vTexCoord;\n" +
+        "uniform sampler2D uTexture;\n" +
+        "out vec4 fragColor;\n" +
+        "void main() {\n" +
+        "    fragColor = texture(uTexture, vTexCoord);\n" +
+        "}\n";
+
+    private Constantes() {
+    }
 }

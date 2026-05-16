@@ -1,12 +1,14 @@
-# Flappy Bird (LWJGL + OpenGL)
+# Escenario Poligonal (LWJGL + OpenGL)
 
-Proyecto del parcial de Programación Gráfica en Java usando **LWJGL + GLFW + OpenGL 3.3**.
+Proyecto simplificado de Programación Gráfica en Java usando **LWJGL + GLFW + OpenGL 3.3**.
 
-Incluye:
-- Juego estilo Flappy Bird para 2 jugadores simultáneos.
-- Pájaros compuestos por figuras geométricas.
-- Dificultad progresiva por puntaje.
-- Pantalla de inicio, HUD y pantalla de game over.
+La base del proyecto ahora es jerárquica:
+- `Escenario`
+- `ObjetoEscena`
+- `Parte`
+- `Punto`
+
+Cada `Parte` define un polígono mediante una lista de puntos relativos. OpenGL renderiza esos polígonos como triángulos.
 
 ## Requisitos
 
@@ -28,20 +30,23 @@ mvn exec:exec -DmainClass=com.graphics.AppFlappyBird
 
 ## Controles
 
-- Jugador 1: `ESPACIO` para saltar
-- Jugador 2: `W` o `FLECHA ARRIBA` para saltar
-- Reiniciar (game over): `ESPACIO` o `ENTER`
+- Jugador 1: `ESPACIO`
+- Jugador 2: `W` o `FLECHA ARRIBA`
+- Reiniciar: `ESPACIO`, `ENTER` o `R`
 - Salir: `ESC`
 
 ## Estructura principal
 
-- `src/main/java/com/graphics/AppFlappyBird.java`: ciclo principal, render y estados UI
-- `src/main/java/com/graphics/Game.java`: lógica del juego, colisiones, puntaje y dificultad
-- `src/main/java/com/graphics/Bird.java`: modelo/dibujo/animación del pájaro
-- `src/main/java/com/graphics/Pipe.java`: obstáculos
-- `src/main/java/com/graphics/InputManager.java`: manejo de teclas
-- `src/main/java/com/graphics/TextRenderer.java`: texto bitmap para HUD/pantallas
-- `src/main/java/com/graphics/SoundManager.java`: efectos de sonido (base)
+- `src/main/java/com/graphics/AppFlappyBird.java`: ventana, loop principal y entrada
+- `src/main/java/com/graphics/Renderizador.java`: shader y dibujo de polígonos
+- `src/main/java/com/graphics/Escenario.java`: contenedor de objetos
+- `src/main/java/com/graphics/ObjetoEscena.java`: transformación global y partes
+- `src/main/java/com/graphics/Parte.java`: polígono relativo y subpartes
+- `src/main/java/com/graphics/Punto.java`: punto base de la geometría
+- `src/main/java/com/graphics/Juego.java`: lógica del juego
+- `src/main/java/com/graphics/Pajaro.java`: entidad del jugador construida con partes
+- `src/main/java/com/graphics/Tuberia.java`: obstáculo poligonal
+- `src/main/java/com/graphics/GeneradorFondo.java`: fondo del escenario
 
 ## Problema común: "no encuentra POM"
 

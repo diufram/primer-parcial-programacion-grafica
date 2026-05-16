@@ -1,125 +1,81 @@
 package com.graphics;
 
-import com.graphics.formas.Sprite;
-
 public class GeneradorFondo {
-    private final Renderizador renderizador;
-    private final Sprite cielo;
-    private final Sprite suelo;
-    private final Sprite nube;
-
-    private static final int CIELO_COLUMNAS = 40;
-    private static final int CIELO_FILAS = 20;
-    private static final int SUELO_COLUMNAS = 40;
-    private static final int SUELO_FILAS = 14;
-
-    public GeneradorFondo(Renderizador renderizador) {
-        this.renderizador = renderizador;
-        this.cielo = crearSpriteCielo();
-        this.suelo = crearSpriteSuelo();
-        this.nube = crearSpriteNube();
+    public GeneradorFondo(Escenario escenario) {
+        escenario.agregarObjeto(crearCielo());
+        escenario.agregarObjeto(crearSuelo());
+        escenario.agregarObjeto(crearNube(-0.75f, 0.72f, 0.10f));
+        escenario.agregarObjeto(crearNube(0.10f, 0.82f, 0.14f));
+        escenario.agregarObjeto(crearNube(0.76f, 0.62f, 0.15f));
+        escenario.agregarObjeto(crearNube(-0.18f, 0.54f, 0.12f));
     }
 
-    public void dibujar() {
-        dibujarCielo();
-        dibujarNubes();
-        dibujarSuelo();
+    private ObjetoEscena crearCielo() {
+        ObjetoEscena objeto = new ObjetoEscena();
+        Parte cieloPoligonal = rectangulo(0.0f, 0.0f, 2.0f, 2.0f, Constantes.COLOR_CIELO);
+        cieloPoligonal.setVisibleConTextura(false);
+        ParteSprite cieloSprite = new ParteSprite("/sprites/background-day.png", 2.0f, 2.0f, Constantes.COLOR_CIELO);
+        objeto.agregarParte(cieloPoligonal);
+        objeto.agregarParte(cieloSprite);
+        return objeto;
     }
 
-    private void dibujarCielo() {
-        float pixelX = 2.0f / CIELO_COLUMNAS;
-        float pixelY = 2.0f / CIELO_FILAS;
-        cielo.dibujar(renderizador, -1.0f, 1.0f, pixelX, pixelY);
+    private ObjetoEscena crearSuelo() {
+        ObjetoEscena objeto = new ObjetoEscena();
+        Parte suelo = rectangulo(0.0f, 0.0f, 2.0f, 0.22f, Constantes.COLOR_SUELO);
+        suelo.setY(-0.90f);
+        suelo.setVisibleConTextura(false);
+        Parte cesped = rectangulo(0.0f, 0.0f, 2.0f, 0.10f, Constantes.COLOR_CESPED);
+        cesped.setY(Constantes.Y_CESPED);
+        cesped.setVisibleConTextura(false);
+        ParteSprite base = new ParteSprite("/sprites/base.png", 2.25f, 0.28f, Constantes.COLOR_SUELO);
+        base.setY(-0.86f);
+        objeto.agregarParte(suelo);
+        objeto.agregarParte(cesped);
+        objeto.agregarParte(base);
+        return objeto;
     }
 
-    private void dibujarNubes() {
-        dibujarNube(-0.75f, 0.72f, 0.75f);
-        dibujarNube(0.10f, 0.80f, 0.62f);
-        dibujarNube(0.78f, 0.62f, 0.70f);
-        dibujarNube(-0.25f, 0.50f, 0.55f);
+    private ObjetoEscena crearNube(float x, float y, float escala) {
+        ObjetoEscena nube = new ObjetoEscena();
+        nube.setX(x);
+        nube.setY(y);
+        nube.setEscala(escala);
+        Parte base = poligonoNube(0.55f, 0.22f);
+        Parte izquierda = poligonoNube(0.34f, 0.20f);
+        Parte derecha = poligonoNube(0.30f, 0.18f);
+        izquierda.setX(-0.34f);
+        izquierda.setY(0.08f);
+        derecha.setX(0.34f);
+        derecha.setY(0.06f);
+        nube.agregarParte(base);
+        nube.agregarParte(izquierda);
+        nube.agregarParte(derecha);
+        return nube;
     }
 
-    private void dibujarNube(float x, float y, float escala) {
-        float p = 0.018f * escala;
-        float left = x - p * 6.0f;
-        float top = y + p * 2.0f;
-        nube.dibujar(renderizador, left, top, p, p);
+    private Parte poligonoNube(float rx, float ry) {
+        Parte parte = new Parte(Constantes.COLOR_NUBE);
+        parte.agregarPunto(-rx, 0.0f)
+                .agregarPunto(-rx * 0.70f, ry * 0.70f)
+                .agregarPunto(0.0f, ry)
+                .agregarPunto(rx * 0.70f, ry * 0.70f)
+                .agregarPunto(rx, 0.0f)
+                .agregarPunto(rx * 0.60f, -ry * 0.70f)
+                .agregarPunto(0.0f, -ry)
+                .agregarPunto(-rx * 0.60f, -ry * 0.70f);
+        return parte;
     }
 
-    private void dibujarSuelo() {
-        float pixelX = 2.0f / SUELO_COLUMNAS;
-        float pixelY = 0.035f;
-        float left = -1.0f;
-        float top = Constantes.Y_CESPED + 0.11f;
-        suelo.dibujar(renderizador, left, top, pixelX, pixelY);
+    private Parte rectangulo(float centroX, float centroY, float ancho, float alto, float[] color) {
+        Parte parte = new Parte(color);
+        float medioAncho = ancho * 0.5f;
+        float medioAlto = alto * 0.5f;
+        parte.agregarPunto(centroX - medioAncho, centroY + medioAlto)
+            .agregarPunto(centroX + medioAncho, centroY + medioAlto)
+            .agregarPunto(centroX + medioAncho, centroY - medioAlto)
+            .agregarPunto(centroX - medioAncho, centroY - medioAlto);
+        return parte;
     }
 
-    private Sprite crearSpriteCielo() {
-        Sprite s = new Sprite();
-        float[] cieloArriba = { 0.42f, 0.80f, 0.95f };
-        float[] cieloAbajo = { 0.55f, 0.86f, 0.96f };
-        for (int y = 0; y < CIELO_FILAS; y++) {
-            float t = y / (float) (CIELO_FILAS - 1);
-            float[] c = {
-                interpolar(cieloArriba[0], cieloAbajo[0], t),
-                interpolar(cieloArriba[1], cieloAbajo[1], t),
-                interpolar(cieloArriba[2], cieloAbajo[2], t)
-            };
-            s.agregarRect(0, y, CIELO_COLUMNAS, 1, c);
-        }
-        return s;
-    }
-
-    private Sprite crearSpriteNube() {
-        Sprite s = new Sprite();
-        float[] blanco = { 0.96f, 1.00f, 1.00f };
-        float[] sombra = { 0.82f, 0.94f, 0.96f };
-
-        s.agregarRect(1, 5, 8, 1, sombra);
-        s.agregarRect(8, 5, 4, 1, sombra);
-        s.agregarRect(0, 4, 3, 1, blanco);
-        s.agregarRect(2, 3, 4, 2, blanco);
-        s.agregarRect(5, 2, 4, 3, blanco);
-        s.agregarRect(8, 3, 3, 2, blanco);
-        s.agregarRect(10, 4, 2, 1, blanco);
-        s.agregarRect(1, 5, 11, 1, blanco);
-        return s;
-    }
-
-    private Sprite crearSpriteSuelo() {
-        Sprite s = new Sprite();
-
-        float[] verdeOscuro = { 0.20f, 0.55f, 0.18f };
-        float[] verdeBase = { 0.36f, 0.78f, 0.22f };
-        float[] verdeClaro = { 0.65f, 0.96f, 0.34f };
-
-        float[] tierraBase = { 0.72f, 0.52f, 0.25f };
-        float[] tierraClara = { 0.86f, 0.66f, 0.34f };
-        float[] tierraOscura = { 0.55f, 0.36f, 0.18f };
-
-        s.agregarRect(0, 0, SUELO_COLUMNAS, 8, tierraBase);
-        s.agregarRect(0, 8, SUELO_COLUMNAS, 1, verdeOscuro);
-        s.agregarRect(0, 9, SUELO_COLUMNAS, 2, verdeBase);
-        s.agregarRect(0, 11, SUELO_COLUMNAS, 1, verdeClaro);
-
-        for (int fila = 0; fila < 4; fila++) {
-            for (int col = 0; col < SUELO_COLUMNAS; col++) {
-                float[] c = ((fila + col) % 2 == 0) ? tierraClara : tierraOscura;
-                s.agregarPixel(col, fila + 1, c);
-            }
-        }
-
-        for (int i = 0; i < SUELO_COLUMNAS; i += 2) {
-            s.agregarPixel(i, 12, verdeClaro);
-            if (i + 1 < SUELO_COLUMNAS && (i / 2) % 2 == 0) {
-                s.agregarPixel(i + 1, 13, verdeClaro);
-            }
-        }
-
-        return s;
-    }
-
-    private float interpolar(float a, float b, float t) {
-        return a + (b - a) * t;
-    }
 }
