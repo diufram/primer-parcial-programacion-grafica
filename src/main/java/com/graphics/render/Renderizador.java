@@ -1,4 +1,8 @@
-package com.graphics;
+package com.graphics.render;
+
+import com.graphics.core.Objeto;
+import com.graphics.core.Parte;
+import com.graphics.core.Punto;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -26,6 +30,7 @@ public class Renderizador {
     private final int vboTextura;
     private final int ubicacionColor;
     private final int ubicacionSampler;
+    private final int ubicacionAlpha;
     private final Map<String, Integer> texturas;
     private boolean texturasHabilitadas;
 
@@ -72,6 +77,7 @@ public class Renderizador {
         }
 
         ubicacionSampler = GL20.glGetUniformLocation(programaTextura, "uTexture");
+        ubicacionAlpha = GL20.glGetUniformLocation(programaTextura, "uAlpha");
 
         GL20.glDeleteShader(vertexShader);
         GL20.glDeleteShader(fragmentShader);
@@ -115,21 +121,10 @@ public class Renderizador {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    public void dibujarObjeto(ObjetoEscena objeto) {
+    public void dibujarObjeto(Objeto objeto) {
         for (Parte parte : objeto.getPartes()) {
             dibujarParte(parte, objeto.getX(), objeto.getY(), objeto.getRotacion(), objeto.getEscala(), null);
         }
-    }
-
-    public void dibujarRect(float centroX, float centroY, float ancho, float alto, float[] color) {
-        List<Punto> puntos = new ArrayList<>();
-        float medioAncho = ancho * 0.5f;
-        float medioAlto = alto * 0.5f;
-        puntos.add(new Punto(centroX - medioAncho, centroY + medioAlto));
-        puntos.add(new Punto(centroX + medioAncho, centroY + medioAlto));
-        puntos.add(new Punto(centroX + medioAncho, centroY - medioAlto));
-        puntos.add(new Punto(centroX - medioAncho, centroY - medioAlto));
-        dibujarPoligono(puntos, color);
     }
 
     public void limpiar() {
@@ -182,12 +177,12 @@ public class Renderizador {
             if (esSprite) {
                 dibujarSprite(parte, puntosMundo);
             } else {
-                dibujarPoligono(puntosMundo, colorParte);
+                dibujarPoligono(puntosMundo, colorParte, parte.getAlpha());
             }
         }
     }
 
-    private void dibujarPoligono(List<Punto> puntos, float[] color) {
+    private void dibujarPoligono(List<Punto> puntos, float[] color, float alpha) {
         if (puntos.size() < 3) {
             return;
         }
@@ -214,7 +209,7 @@ public class Renderizador {
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_DYNAMIC_DRAW);
-        GL20.glUniform3f(ubicacionColor, color[0], color[1], color[2]);
+        GL20.glUniform4f(ubicacionColor, color[0], color[1], color[2], alpha);
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertices.length / 2);
     }
 
@@ -224,7 +219,7 @@ public class Renderizador {
         }
 
         if (!texturasHabilitadas) {
-            dibujarPoligono(puntos, parte.getColor());
+            dibujarPoligono(puntos, parte.getColor(), parte.getAlpha());
             return;
         }
 
@@ -234,6 +229,7 @@ public class Renderizador {
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textura);
         GL20.glUniform1i(ubicacionSampler, 0);
+        GL20.glUniform1f(ubicacionAlpha, parte.getAlpha());
 
         float[] vertices = {
                 puntos.get(0).getX(), puntos.get(0).getY(), 0.0f, 0.0f,

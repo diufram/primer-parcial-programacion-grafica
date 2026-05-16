@@ -1,4 +1,4 @@
-package com.graphics;
+package com.graphics.core;
 
 public class Punto {
     private final float x;

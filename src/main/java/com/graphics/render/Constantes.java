@@ -1,4 +1,4 @@
-package com.graphics;
+package com.graphics.render;
 
 public class Constantes {
     public static final int ANCHO_VENTANA = 900;
@@ -26,10 +26,10 @@ public class Constantes {
 
     public static final String SHADER_FRAGMENT_SOURCE =
         "#version 330 core\n" +
-        "uniform vec3 uColor;\n" +
+        "uniform vec4 uColor;\n" +
         "out vec4 fragColor;\n" +
         "void main() {\n" +
-        "    fragColor = vec4(uColor, 1.0);\n" +
+        "    fragColor = uColor;\n" +
         "}\n";
 
     public static final String SHADER_VERTEX_TEXTURA_SOURCE =
@@ -46,9 +46,10 @@ public class Constantes {
         "#version 330 core\n" +
         "in vec2 vTexCoord;\n" +
         "uniform sampler2D uTexture;\n" +
+        "uniform float uAlpha;\n" +
         "out vec4 fragColor;\n" +
         "void main() {\n" +
-        "    fragColor = texture(uTexture, vTexCoord);\n" +
+        "    fragColor = texture(uTexture, vTexCoord) * uAlpha;\n" +
         "}\n";
 
     private Constantes() {

@@ -1,4 +1,4 @@
-package com.graphics;
+package com.graphics.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,7 @@ public class Parte {
     private float rotacion;
     private float escala;
     private float[] color;
+    private float alpha;
     private String rutaTextura;
     private boolean visibleConTextura;
     private boolean visibleSinTextura;
@@ -20,23 +21,13 @@ public class Parte {
         this.puntos = new ArrayList<>();
         this.color = color;
         this.escala = 1.0f;
+        this.alpha = 1.0f;
         this.visibleConTextura = true;
         this.visibleSinTextura = true;
     }
 
     public Parte agregarPunto(float x, float y) {
         puntos.add(new Punto(x, y));
-        return this;
-    }
-
-    public Parte definirRectangulo(float ancho, float alto) {
-        puntos.clear();
-        float medioAncho = ancho * 0.5f;
-        float medioAlto = alto * 0.5f;
-        agregarPunto(-medioAncho, medioAlto)
-            .agregarPunto(medioAncho, medioAlto)
-            .agregarPunto(medioAncho, -medioAlto)
-            .agregarPunto(-medioAncho, -medioAlto);
         return this;
     }
 
@@ -103,6 +94,14 @@ public class Parte {
 
     public void setColor(float[] color) {
         this.color = color;
+    }
+
+    public float getAlpha() {
+        return alpha;
+    }
+
+    public void setAlpha(float alpha) {
+        this.alpha = alpha;
     }
 
     public String getRutaTextura() {

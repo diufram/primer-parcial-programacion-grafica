@@ -1,4 +1,4 @@
-package com.graphics;
+package com.graphics.audio;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;

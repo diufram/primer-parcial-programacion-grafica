@@ -1,25 +1,24 @@
-package com.graphics;
+package com.graphics.core;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ObjetoEscena {
-    private final List<Parte> partes;
-    private float x;
-    private float y;
-    private float rotacion;
-    private float escala;
-    private boolean visible;
+public abstract class Objeto {
+    protected float x;
+    protected float y;
+    protected float rotacion;
+    protected float escala;
+    protected boolean visible;
+    protected final List<Parte> partes;
 
-    public ObjetoEscena() {
+    public Objeto() {
         this.partes = new ArrayList<>();
         this.escala = 1.0f;
         this.visible = true;
     }
 
-    public ObjetoEscena agregarParte(Parte parte) {
+    public void agregarParte(Parte parte) {
         partes.add(parte);
-        return this;
     }
 
     public List<Parte> getPartes() {
@@ -64,5 +63,8 @@ public class ObjetoEscena {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public void actualizar(float dt) {
     }
 }

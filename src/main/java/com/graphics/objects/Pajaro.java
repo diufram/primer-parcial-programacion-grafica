@@ -1,25 +1,25 @@
-package com.graphics;
+package com.graphics.objects;
 
-public class Pajaro {
-    private final ObjetoEscena objeto;
-    private final Parte sprite;
-    private final Parte alaRespaldo;
+import com.graphics.core.Objeto;
+import com.graphics.core.Parte;
+import com.graphics.render.Constantes;
+import com.graphics.game.Juego;
+
+public class Pajaro extends Objeto {
     private final float xInicial;
     private final float gravedad;
     private final float impulsoSalto;
     private final float velocidadMaxCaida;
     private final float ancho;
     private final float alto;
-    private float y;
+    private final Parte sprite;
+    private final Parte alaRespaldo;
     private float velocidadY;
     private boolean vivo;
     private float tiempoAnimacion;
 
     public Pajaro(float x, float y, float gravedad, float impulsoSalto, float velocidadMaxCaida,
                   float ancho, float alto, float[] color) {
-        this.objeto = new ObjetoEscena();
-        this.sprite = crearSprite(color, ancho, alto);
-        this.alaRespaldo = crearAla(color);
         this.xInicial = x;
         this.y = y;
         this.gravedad = gravedad;
@@ -28,13 +28,16 @@ public class Pajaro {
         this.ancho = ancho;
         this.alto = alto;
         this.vivo = true;
-        objeto.agregarParte(crearCuerpo(color));
-        objeto.agregarParte(alaRespaldo);
-        objeto.agregarParte(crearPico());
-        objeto.agregarParte(crearOjo());
-        objeto.agregarParte(sprite);
-        objeto.setX(x);
-        objeto.setY(y);
+        this.sprite = crearSprite(color, ancho, alto);
+        this.alaRespaldo = crearAla(color);
+
+        agregarParte(crearCuerpo(color));
+        agregarParte(alaRespaldo);
+        agregarParte(crearPico());
+        agregarParte(crearOjo());
+        agregarParte(sprite);
+        setX(x);
+        setY(y);
     }
 
     public void saltar() {
@@ -45,6 +48,7 @@ public class Pajaro {
         alaRespaldo.setRotacion(-0.7f);
     }
 
+    @Override
     public void actualizar(float dt) {
         if (!vivo) {
             return;
@@ -57,9 +61,9 @@ public class Pajaro {
         }
         y += velocidadY * dt;
 
-        objeto.setX(xInicial);
-        objeto.setY(y);
-        objeto.setRotacion(Math.max(-0.45f, Math.min(0.35f, velocidadY * 0.35f)));
+        setX(xInicial);
+        setY(y);
+        setRotacion(Math.max(-0.45f, Math.min(0.35f, velocidadY * 0.35f)));
         float aleteo = (float) Math.sin(tiempoAnimacion * 12.0f) * 0.25f;
         alaRespaldo.setRotacion(alaRespaldo.getRotacion() * 0.85f + aleteo * 0.15f);
         sprite.setRutaTextura(obtenerFrameSprite());
@@ -70,15 +74,11 @@ public class Pajaro {
         this.velocidadY = 0.0f;
         this.vivo = true;
         this.tiempoAnimacion = 0.0f;
-        objeto.setX(xInicial);
-        objeto.setY(nuevoY);
-        objeto.setRotacion(0.0f);
+        setX(xInicial);
+        setY(nuevoY);
+        setRotacion(0.0f);
         alaRespaldo.setRotacion(0.0f);
         sprite.setRutaTextura(obtenerFrameSprite());
-    }
-
-    public ObjetoEscena getObjeto() {
-        return objeto;
     }
 
     public boolean estaVivo() {
@@ -87,14 +87,6 @@ public class Pajaro {
 
     public void setVivo(boolean vivo) {
         this.vivo = vivo;
-    }
-
-    public float getX() {
-        return xInicial;
-    }
-
-    public float getY() {
-        return y;
     }
 
     public float getAncho() {
@@ -117,7 +109,12 @@ public class Pajaro {
         Parte parte = new Parte(colorBase);
         parte.setRutaTextura(resolverRutaPajaro(colorBase, "midflap"));
         parte.setVisibleSinTextura(false);
-        parte.definirRectangulo(ancho * 1.45f, alto * 1.15f);
+        float medioAncho = ancho * 1.45f * 0.5f;
+        float medioAlto = alto * 1.15f * 0.5f;
+        parte.agregarPunto(-medioAncho, medioAlto)
+            .agregarPunto(medioAncho, medioAlto)
+            .agregarPunto(medioAncho, -medioAlto)
+            .agregarPunto(-medioAncho, -medioAlto);
         parte.setPivote(0.0f, 0.0f);
         return parte;
     }

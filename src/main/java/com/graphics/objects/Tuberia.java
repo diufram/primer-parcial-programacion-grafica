@@ -1,38 +1,37 @@
-package com.graphics;
+package com.graphics.objects;
 
-public class Tuberia {
-    private final ObjetoEscena objeto;
-    private float x;
+import com.graphics.core.Objeto;
+import com.graphics.core.Parte;
+import com.graphics.render.Constantes;
+
+public class Tuberia extends Objeto {
     private final float gapCentroY;
+    private final float gapAlto;
     private boolean puntuadaJugador1;
     private boolean puntuadaJugador2;
     private final float ancho;
-    private final float gapAlto;
+    private float velocidad;
 
     public Tuberia(float x, float gapCentroY, float ancho, float gapAlto) {
-        this.objeto = new ObjetoEscena();
-        this.x = x;
         this.gapCentroY = gapCentroY;
-        this.ancho = ancho;
         this.gapAlto = gapAlto;
+        this.ancho = ancho;
         this.puntuadaJugador1 = false;
         this.puntuadaJugador2 = false;
-        objeto.setX(x);
-        objeto.setY(gapCentroY);
+        this.velocidad = 0.62f;
+        setX(x);
+        setY(gapCentroY);
         construirPartes();
     }
 
-    public void actualizar(float velX, float dt) {
-        x -= velX * dt;
-        objeto.setX(x);
+    public void setVelocidad(float velocidad) {
+        this.velocidad = velocidad;
     }
 
-    public ObjetoEscena getObjeto() {
-        return objeto;
-    }
-
-    public float getX() {
-        return x;
+    @Override
+    public void actualizar(float dt) {
+        x -= velocidad * dt;
+        setX(x);
     }
 
     public float getAncho() {
@@ -70,40 +69,45 @@ public class Tuberia {
         float centroSuperiorLocal = (gapAlto * 0.5f) + (altoSuperior * 0.5f);
         float centroInferiorLocal = -(gapAlto * 0.5f) - (altoInferior * 0.5f);
 
-        Parte respaldoSuperior = crearRectangulo(0.0f, centroSuperiorLocal, ancho, altoSuperior, Constantes.COLOR_TUBERIA);
+        Parte respaldoSuperior = new Parte(Constantes.COLOR_TUBERIA);
+        float medioAncho = ancho * 0.5f;
+        float medioAltoSuperior = altoSuperior * 0.5f;
+        respaldoSuperior.agregarPunto(-medioAncho, centroSuperiorLocal + medioAltoSuperior)
+            .agregarPunto(medioAncho, centroSuperiorLocal + medioAltoSuperior)
+            .agregarPunto(medioAncho, centroSuperiorLocal - medioAltoSuperior)
+            .agregarPunto(-medioAncho, centroSuperiorLocal - medioAltoSuperior);
         respaldoSuperior.setVisibleConTextura(false);
-        Parte respaldoInferior = crearRectangulo(0.0f, centroInferiorLocal, ancho, altoInferior, Constantes.COLOR_TUBERIA);
+        agregarParte(respaldoSuperior);
+
+        Parte respaldoInferior = new Parte(Constantes.COLOR_TUBERIA);
+        float medioAltoInferior = altoInferior * 0.5f;
+        respaldoInferior.agregarPunto(-medioAncho, centroInferiorLocal + medioAltoInferior)
+            .agregarPunto(medioAncho, centroInferiorLocal + medioAltoInferior)
+            .agregarPunto(medioAncho, centroInferiorLocal - medioAltoInferior)
+            .agregarPunto(-medioAncho, centroInferiorLocal - medioAltoInferior);
         respaldoInferior.setVisibleConTextura(false);
+        agregarParte(respaldoInferior);
 
         Parte superior = crearParteTextura("/sprites/pipe-green.png", ancho * 1.55f, altoSuperior, Constantes.COLOR_TUBERIA);
         superior.setY(centroSuperiorLocal);
         superior.setRotacion((float) Math.PI);
+        agregarParte(superior);
 
         Parte inferior = crearParteTextura("/sprites/pipe-green.png", ancho * 1.55f, altoInferior, Constantes.COLOR_TUBERIA);
         inferior.setY(centroInferiorLocal);
-
-        objeto.agregarParte(respaldoSuperior);
-        objeto.agregarParte(respaldoInferior);
-        objeto.agregarParte(superior);
-        objeto.agregarParte(inferior);
-    }
-
-    private Parte crearRectangulo(float centroX, float centroY, float ancho, float alto, float[] color) {
-        Parte parte = new Parte(color);
-        float medioAncho = ancho * 0.5f;
-        float medioAlto = alto * 0.5f;
-        parte.agregarPunto(centroX - medioAncho, centroY + medioAlto)
-            .agregarPunto(centroX + medioAncho, centroY + medioAlto)
-            .agregarPunto(centroX + medioAncho, centroY - medioAlto)
-            .agregarPunto(centroX - medioAncho, centroY - medioAlto);
-        return parte;
+        agregarParte(inferior);
     }
 
     private Parte crearParteTextura(String rutaTextura, float ancho, float alto, float[] colorRespaldo) {
         Parte parte = new Parte(colorRespaldo);
         parte.setRutaTextura(rutaTextura);
         parte.setVisibleSinTextura(false);
-        parte.definirRectangulo(ancho, alto);
+        float hw = ancho * 0.5f;
+        float hh = alto * 0.5f;
+        parte.agregarPunto(-hw, hh)
+            .agregarPunto(hw, hh)
+            .agregarPunto(hw, -hh)
+            .agregarPunto(-hw, -hh);
         return parte;
     }
 }

@@ -1,4 +1,12 @@
-package com.graphics;
+package com.graphics.game;
+
+import com.graphics.render.Escenario;
+import com.graphics.audio.GestorAudio;
+import com.graphics.objects.Pajaro;
+import com.graphics.objects.Tuberia;
+import com.graphics.objects.GameOver;
+import com.graphics.objects.FondoOscuro;
+import com.graphics.render.Constantes;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,6 +33,8 @@ public class Juego {
 
     private Pajaro jugador1;
     private Pajaro jugador2;
+    private GameOver gameOver;
+    private FondoOscuro fondoOscuro;
     private int puntajeJugador1;
     private int puntajeJugador2;
     private float temporizadorSpawn;
@@ -35,7 +45,7 @@ public class Juego {
     private boolean finJuego;
     private boolean juegoTerminado;
 
-    public Juego(Escenario escenario, GestorAudio gestorAudio) {
+    public Juego(Escenario escenario, GestorAudio gestorAudio, GameOver gameOver, FondoOscuro fondoOscuro) {
         this.tuberias = new ArrayList<>();
         this.aleatorio = new Random();
         this.gapMinCentro = -0.45f;
@@ -44,6 +54,8 @@ public class Juego {
         this.gapAlto = 0.48f;
         this.escenario = escenario;
         this.gestorAudio = gestorAudio;
+        this.fondoOscuro = fondoOscuro;
+        this.gameOver = gameOver;
         reiniciar();
     }
 
@@ -52,16 +64,16 @@ public class Juego {
 
         if (jugador1 == null) {
             jugador1 = new Pajaro(BIRD_X_PLAYER1, 0.0f, GRAVEDAD, IMPULSO_SALTO,
-                VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO, Constantes.COLOR_JUGADOR1);
-            escenario.agregarObjeto(jugador1.getObjeto());
+                    VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO, Constantes.COLOR_JUGADOR1);
+            escenario.agregarObjeto(jugador1);
         } else {
             jugador1.reiniciar(0.0f);
         }
 
         if (jugador2 == null) {
             jugador2 = new Pajaro(BIRD_X_PLAYER2, 0.0f, GRAVEDAD, IMPULSO_SALTO,
-                VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO, Constantes.COLOR_JUGADOR2);
-            escenario.agregarObjeto(jugador2.getObjeto());
+                    VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO, Constantes.COLOR_JUGADOR2);
+            escenario.agregarObjeto(jugador2);
         } else {
             jugador2.reiniciar(0.0f);
         }
@@ -75,6 +87,10 @@ public class Juego {
         iniciado = false;
         finJuego = false;
         juegoTerminado = false;
+        gameOver.setVisible(false);
+        gameOver.setAlpha(0.0f);
+        fondoOscuro.setVisible(false);
+        fondoOscuro.setAlpha(0.0f);
     }
 
     public void saltoJugador1() {
@@ -104,7 +120,8 @@ public class Juego {
     }
 
     public void actualizar(float dt) {
-        if (!iniciado || juegoTerminado) return;
+        if (!iniciado || juegoTerminado)
+            return;
 
         jugador1.actualizar(dt);
         jugador2.actualizar(dt);
@@ -134,6 +151,10 @@ public class Juego {
         if (!jugador1.estaVivo() && !jugador2.estaVivo()) {
             finJuego = true;
             juegoTerminado = true;
+            fondoOscuro.setVisible(true);
+            gameOver.setVisible(true);
+            fondoOscuro.setAlpha(0.7f);
+            gameOver.setAlpha(1.0f);
             gestorAudio.reproducirMuerte();
             return;
         }
@@ -147,7 +168,7 @@ public class Juego {
         Iterator<Tuberia> it = tuberias.iterator();
         while (it.hasNext()) {
             Tuberia p = it.next();
-            p.actualizar(velocidadTuberias, dt);
+            p.actualizar(dt);
 
             if (p.pasoPorX(BIRD_X_PLAYER1, 1) && jugador1.estaVivo()) {
                 puntajeJugador1++;
@@ -170,7 +191,7 @@ public class Juego {
             }
 
             if (p.estaFueraDePantalla()) {
-                escenario.quitarObjeto(p.getObjeto());
+                escenario.quitarObjeto(p);
                 it.remove();
             }
         }
@@ -185,7 +206,8 @@ public class Juego {
         float tuberiaIzquierda = tuberia.getX() - (tuberia.getAncho() * 0.5f);
         float tuberiaDerecha = tuberia.getX() + (tuberia.getAncho() * 0.5f);
         boolean haySolapamientoX = pajaroDerecha > tuberiaIzquierda && pajaroIzquierda < tuberiaDerecha;
-        if (!haySolapamientoX) return false;
+        if (!haySolapamientoX)
+            return false;
 
         return pajaroArriba > tuberia.getGapSuperior() || pajaroAbajo < tuberia.getGapInferior();
     }
@@ -193,13 +215,14 @@ public class Juego {
     private void crearTuberia() {
         float gapCentro = gapMinCentro + aleatorio.nextFloat() * (gapMaxCentro - gapMinCentro);
         Tuberia tuberia = new Tuberia(1.2f, gapCentro, pipeAncho, gapAlto);
+        tuberia.setVelocidad(velocidadTuberias);
         tuberias.add(tuberia);
-        escenario.agregarObjeto(tuberia.getObjeto());
+        escenario.agregarObjeto(tuberia);
     }
 
     private void limpiarTuberias() {
         for (Tuberia tuberia : tuberias) {
-            escenario.quitarObjeto(tuberia.getObjeto());
+            escenario.quitarObjeto(tuberia);
         }
         tuberias.clear();
     }
@@ -207,17 +230,35 @@ public class Juego {
     private void actualizarDificultad() {
         int puntajeMaximo = Math.max(puntajeJugador1, puntajeJugador2);
         nivel = (puntajeMaximo / 5) + 1;
-        if (nivel > 10) nivel = 10;
+        if (nivel > 10)
+            nivel = 10;
 
         velocidadTuberias = 0.62f + (nivel - 1) * 0.08f;
-        if (velocidadTuberias > 1.4f) velocidadTuberias = 1.4f;
+        if (velocidadTuberias > 1.4f)
+            velocidadTuberias = 1.4f;
 
         tiempoEntreTuberias = 1.5f - (nivel - 1) * 0.08f;
-        if (tiempoEntreTuberias < 0.8f) tiempoEntreTuberias = 0.8f;
+        if (tiempoEntreTuberias < 0.8f)
+            tiempoEntreTuberias = 0.8f;
+
+        for (Tuberia tuberia : tuberias) {
+            tuberia.setVelocidad(velocidadTuberias);
+        }
     }
 
-    public int getPuntajeJugador1() { return puntajeJugador1; }
-    public int getPuntajeJugador2() { return puntajeJugador2; }
-    public boolean estaJuegoTerminado() { return juegoTerminado; }
-    public int getNivel() { return nivel; }
+    public int getPuntajeJugador1() {
+        return puntajeJugador1;
+    }
+
+    public int getPuntajeJugador2() {
+        return puntajeJugador2;
+    }
+
+    public boolean estaJuegoTerminado() {
+        return juegoTerminado;
+    }
+
+    public int getNivel() {
+        return nivel;
+    }
 }

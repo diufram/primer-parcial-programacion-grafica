@@ -1,5 +1,14 @@
-package com.graphics;
+package com.graphics.game;
 
+import com.graphics.render.Renderizador;
+import com.graphics.render.Constantes;
+import com.graphics.render.Escenario;
+import com.graphics.audio.GestorAudio;
+import com.graphics.objects.Cielo;
+import com.graphics.objects.Suelo;
+import com.graphics.objects.Nube;
+import com.graphics.objects.GameOver;
+import com.graphics.objects.FondoOscuro;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 
@@ -10,6 +19,8 @@ public class AppFlappyBird {
     private Escenario escenario;
     private Juego juego;
     private GestorAudio gestorAudio;
+    private GameOver gameOver;
+    private FondoOscuro fondoOscuro;
     private boolean espacioAnterior;
     private boolean wAnterior;
     private boolean arribaAnterior;
@@ -55,8 +66,26 @@ public class AppFlappyBird {
         renderizador = new Renderizador();
         gestorAudio = new GestorAudio();
         escenario = new Escenario();
-        new GeneradorFondo(escenario);
-        juego = new Juego(escenario, gestorAudio);
+        gameOver = new GameOver();
+        fondoOscuro = new FondoOscuro();
+        gameOver.setVisible(false);
+        fondoOscuro.setVisible(false);
+        escenario.agregarObjeto(new Cielo());
+        escenario.agregarObjeto(new Suelo());
+        escenario.agregarObjeto(new Nube(-0.75f, 0.72f, 0.10f));
+        escenario.agregarObjeto(new Nube(0.10f, 0.82f, 0.14f));
+        escenario.agregarObjeto(new Nube(0.76f, 0.62f, 0.15f));
+        escenario.agregarObjeto(new Nube(-0.18f, 0.54f, 0.12f));
+        juego = new Juego(escenario, gestorAudio, gameOver, fondoOscuro);
+    }
+
+    private void renderizar() {
+        renderizador.prepararFrame();
+        escenario.dibujar(renderizador);
+        if (juego.estaJuegoTerminado()) {
+            renderizador.dibujarObjeto(fondoOscuro);
+            renderizador.dibujarObjeto(gameOver);
+        }
     }
 
     private void bucleJuego() {
@@ -111,11 +140,6 @@ public class AppFlappyBird {
     private void actualizar(float dt) {
         juego.actualizar(dt);
         actualizarTitulo();
-    }
-
-    private void renderizar() {
-        renderizador.prepararFrame();
-        escenario.dibujar(renderizador);
     }
 
     private void actualizarTitulo() {
