@@ -1,13 +1,12 @@
 package com.graphics.game;
 
-import com.graphics.render.Escenario;
 import com.graphics.audio.GestorAudio;
+import com.graphics.core.Escenario;
 import com.graphics.objects.Pajaro;
 import com.graphics.objects.Tuberia;
 import com.graphics.objects.GameOver;
 import com.graphics.objects.FondoOscuro;
 import com.graphics.render.Constantes;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
