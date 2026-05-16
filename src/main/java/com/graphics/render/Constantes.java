@@ -38,7 +38,7 @@ public class Constantes {
     public static final float TIEMPO_ENTRE_TUBERIAS_MIN = 0.8f;
     public static final float ALPHA_FONDO_OSCURO = 0.7f;
     // Si cualquier jugador alcanza este puntaje, la partida termina.
-    public static final int PUNTAJE_OBJETIVO = 4;
+    public static final int PUNTAJE_OBJETIVO = 2;
 
     public static final String SHADER_VERTEX_SOURCE = "#version 330 core\n" +
             "layout (location = 0) in vec2 aPos;\n" +

@@ -1,9 +1,8 @@
-package com.graphics.render;
-
-import com.graphics.core.Objeto;
+package com.graphics.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.graphics.render.Renderizador;
 
 public class Escenario {
     private final List<Objeto> objetos;

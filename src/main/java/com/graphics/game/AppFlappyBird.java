@@ -2,8 +2,8 @@ package com.graphics.game;
 
 import com.graphics.render.Renderizador;
 import com.graphics.render.Constantes;
-import com.graphics.render.Escenario;
 import com.graphics.audio.GestorAudio;
+import com.graphics.core.Escenario;
 import com.graphics.objects.Cielo;
 import com.graphics.objects.Suelo;
 import com.graphics.objects.Nube;
@@ -49,11 +49,10 @@ public class AppFlappyBird {
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
 
         ventana = GLFW.glfwCreateWindow(
-            Constantes.ANCHO_VENTANA,
-            Constantes.ALTO_VENTANA,
-            "Flappy Bird - 3 Jugadores",
-            0, 0
-        );
+                Constantes.ANCHO_VENTANA,
+                Constantes.ALTO_VENTANA,
+                "Flappy Bird - 3 Jugadores",
+                0, 0);
 
         if (ventana == 0) {
             throw new RuntimeException("No se pudo crear la ventana");
@@ -95,7 +94,8 @@ public class AppFlappyBird {
             float ahora = (float) GLFW.glfwGetTime();
             float dt = ahora - ultimoTiempo;
             ultimoTiempo = ahora;
-            if (dt > 0.033f) dt = 0.033f;
+            if (dt > 0.033f)
+                dt = 0.033f;
 
             procesarEntrada();
             actualizar(dt);
@@ -150,9 +150,9 @@ public class AppFlappyBird {
 
     private void actualizarTitulo() {
         String titulo = "Escenario Poligonal 3P | P1:" + juego.getPuntajeJugador1()
-            + " P2:" + juego.getPuntajeJugador2()
-            + " P3:" + juego.getPuntajeJugador3()
-            + " | Nivel:" + juego.getNivel();
+                + " P2:" + juego.getPuntajeJugador2()
+                + " P3:" + juego.getPuntajeJugador3()
+                + " | Nivel:" + juego.getNivel();
 
         if (juego.estaJuegoTerminado()) {
             titulo += " | GAME OVER | SPACE/ENTER/R reinician";
