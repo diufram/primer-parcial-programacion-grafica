@@ -14,20 +14,8 @@ import java.util.List;
 import java.util.Random;
 
 public class Juego {
-    public static final float GRAVEDAD = -1.9f;
-    public static final float IMPULSO_SALTO = 0.85f;
-    public static final float VELOCIDAD_MAX_CAIDA = -1.8f;
-    public static final float BIRD_ANCHO = 0.10f;
-    public static final float BIRD_ALTO = 0.10f;
-    public static final float BIRD_X_PLAYER1 = -0.45f;
-    public static final float BIRD_X_PLAYER2 = -0.30f;
-
     private final List<Tuberia> tuberias;
     private final Random aleatorio;
-    private final float gapMinCentro;
-    private final float gapMaxCentro;
-    private final float pipeAncho;
-    private final float gapAlto;
     private final Escenario escenario;
     private final GestorAudio gestorAudio;
 
@@ -48,10 +36,6 @@ public class Juego {
     public Juego(Escenario escenario, GestorAudio gestorAudio, GameOver gameOver, FondoOscuro fondoOscuro) {
         this.tuberias = new ArrayList<>();
         this.aleatorio = new Random();
-        this.gapMinCentro = -0.45f;
-        this.gapMaxCentro = 0.45f;
-        this.pipeAncho = 0.18f;
-        this.gapAlto = 0.48f;
         this.escenario = escenario;
         this.gestorAudio = gestorAudio;
         this.fondoOscuro = fondoOscuro;
@@ -63,16 +47,18 @@ public class Juego {
         limpiarTuberias();
 
         if (jugador1 == null) {
-            jugador1 = new Pajaro(BIRD_X_PLAYER1, 0.0f, GRAVEDAD, IMPULSO_SALTO,
-                    VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO, Constantes.COLOR_JUGADOR1);
+            jugador1 = new Pajaro(Constantes.BIRD_X_PLAYER1, 0.0f, Constantes.GRAVEDAD,
+                    Constantes.IMPULSO_SALTO, Constantes.VELOCIDAD_MAX_CAIDA,
+                    Constantes.BIRD_ANCHO, Constantes.BIRD_ALTO, Constantes.COLOR_JUGADOR1);
             escenario.agregarObjeto(jugador1);
         } else {
             jugador1.reiniciar(0.0f);
         }
 
         if (jugador2 == null) {
-            jugador2 = new Pajaro(BIRD_X_PLAYER2, 0.0f, GRAVEDAD, IMPULSO_SALTO,
-                    VELOCIDAD_MAX_CAIDA, BIRD_ANCHO, BIRD_ALTO, Constantes.COLOR_JUGADOR2);
+            jugador2 = new Pajaro(Constantes.BIRD_X_PLAYER2, 0.0f, Constantes.GRAVEDAD,
+                    Constantes.IMPULSO_SALTO, Constantes.VELOCIDAD_MAX_CAIDA,
+                    Constantes.BIRD_ANCHO, Constantes.BIRD_ALTO, Constantes.COLOR_JUGADOR2);
             escenario.agregarObjeto(jugador2);
         } else {
             jugador2.reiniciar(0.0f);
@@ -81,8 +67,8 @@ public class Juego {
         puntajeJugador1 = 0;
         puntajeJugador2 = 0;
         temporizadorSpawn = 0.0f;
-        velocidadTuberias = 0.62f;
-        tiempoEntreTuberias = 1.5f;
+        velocidadTuberias = Constantes.VELOCIDAD_TUBERIAS_INICIAL;
+        tiempoEntreTuberias = Constantes.TIEMPO_ENTRE_TUBERIAS_INICIAL;
         nivel = 1;
         iniciado = false;
         finJuego = false;
@@ -153,7 +139,7 @@ public class Juego {
             juegoTerminado = true;
             fondoOscuro.setVisible(true);
             gameOver.setVisible(true);
-            fondoOscuro.setAlpha(0.7f);
+            fondoOscuro.setAlpha(Constantes.ALPHA_FONDO_OSCURO);
             gameOver.setAlpha(1.0f);
             gestorAudio.reproducirMuerte();
             return;
@@ -170,12 +156,12 @@ public class Juego {
             Tuberia p = it.next();
             p.actualizar(dt);
 
-            if (p.pasoPorX(BIRD_X_PLAYER1, 1) && jugador1.estaVivo()) {
+            if (p.pasoPorX(Constantes.BIRD_X_PLAYER1, 1) && jugador1.estaVivo()) {
                 puntajeJugador1++;
                 gestorAudio.reproducirPunto();
                 actualizarDificultad();
             }
-            if (p.pasoPorX(BIRD_X_PLAYER2, 2) && jugador2.estaVivo()) {
+            if (p.pasoPorX(Constantes.BIRD_X_PLAYER2, 2) && jugador2.estaVivo()) {
                 puntajeJugador2++;
                 gestorAudio.reproducirPunto();
                 actualizarDificultad();
@@ -213,8 +199,9 @@ public class Juego {
     }
 
     private void crearTuberia() {
-        float gapCentro = gapMinCentro + aleatorio.nextFloat() * (gapMaxCentro - gapMinCentro);
-        Tuberia tuberia = new Tuberia(1.2f, gapCentro, pipeAncho, gapAlto);
+        float gapCentro = Constantes.GAP_MIN_CENTRO
+                + aleatorio.nextFloat() * (Constantes.GAP_MAX_CENTRO - Constantes.GAP_MIN_CENTRO);
+        Tuberia tuberia = new Tuberia(1.2f, gapCentro, Constantes.PIPE_ANCHO, Constantes.GAP_ALTO);
         tuberia.setVelocidad(velocidadTuberias);
         tuberias.add(tuberia);
         escenario.agregarObjeto(tuberia);
@@ -233,13 +220,13 @@ public class Juego {
         if (nivel > 10)
             nivel = 10;
 
-        velocidadTuberias = 0.62f + (nivel - 1) * 0.08f;
-        if (velocidadTuberias > 1.4f)
-            velocidadTuberias = 1.4f;
+        velocidadTuberias = Constantes.VELOCIDAD_TUBERIAS_INICIAL + (nivel - 1) * 0.08f;
+        if (velocidadTuberias > Constantes.VELOCIDAD_TUBERIAS_MAX)
+            velocidadTuberias = Constantes.VELOCIDAD_TUBERIAS_MAX;
 
-        tiempoEntreTuberias = 1.5f - (nivel - 1) * 0.08f;
-        if (tiempoEntreTuberias < 0.8f)
-            tiempoEntreTuberias = 0.8f;
+        tiempoEntreTuberias = Constantes.TIEMPO_ENTRE_TUBERIAS_INICIAL - (nivel - 1) * 0.08f;
+        if (tiempoEntreTuberias < Constantes.TIEMPO_ENTRE_TUBERIAS_MIN)
+            tiempoEntreTuberias = Constantes.TIEMPO_ENTRE_TUBERIAS_MIN;
 
         for (Tuberia tuberia : tuberias) {
             tuberia.setVelocidad(velocidadTuberias);

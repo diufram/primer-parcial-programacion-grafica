@@ -17,6 +17,23 @@ public class Constantes {
     public static final float[] COLOR_TUBERIA = {0.22f, 0.66f, 0.25f};
     public static final float[] COLOR_TUBERIA_BORDE = {0.12f, 0.42f, 0.15f};
 
+    public static final float GRAVEDAD = -1.9f;
+    public static final float IMPULSO_SALTO = 0.85f;
+    public static final float VELOCIDAD_MAX_CAIDA = -1.8f;
+    public static final float BIRD_ANCHO = 0.10f;
+    public static final float BIRD_ALTO = 0.10f;
+    public static final float BIRD_X_PLAYER1 = -0.45f;
+    public static final float BIRD_X_PLAYER2 = -0.30f;
+    public static final float GAP_MIN_CENTRO = -0.45f;
+    public static final float GAP_MAX_CENTRO = 0.45f;
+    public static final float PIPE_ANCHO = 0.18f;
+    public static final float GAP_ALTO = 0.48f;
+    public static final float VELOCIDAD_TUBERIAS_INICIAL = 0.62f;
+    public static final float VELOCIDAD_TUBERIAS_MAX = 1.4f;
+    public static final float TIEMPO_ENTRE_TUBERIAS_INICIAL = 1.5f;
+    public static final float TIEMPO_ENTRE_TUBERIAS_MIN = 0.8f;
+    public static final float ALPHA_FONDO_OSCURO = 0.7f;
+
     public static final String SHADER_VERTEX_SOURCE =
         "#version 330 core\n" +
         "layout (location = 0) in vec2 aPos;\n" +

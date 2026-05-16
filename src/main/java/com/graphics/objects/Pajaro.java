@@ -3,7 +3,6 @@ package com.graphics.objects;
 import com.graphics.core.Objeto;
 import com.graphics.core.Parte;
 import com.graphics.render.Constantes;
-import com.graphics.game.Juego;
 
 public class Pajaro extends Objeto {
     private final float xInicial;
@@ -19,7 +18,7 @@ public class Pajaro extends Objeto {
     private float tiempoAnimacion;
 
     public Pajaro(float x, float y, float gravedad, float impulsoSalto, float velocidadMaxCaida,
-                  float ancho, float alto, float[] color) {
+            float ancho, float alto, float[] color) {
         this.xInicial = x;
         this.y = y;
         this.gravedad = gravedad;
@@ -112,9 +111,9 @@ public class Pajaro extends Objeto {
         float medioAncho = ancho * 1.45f * 0.5f;
         float medioAlto = alto * 1.15f * 0.5f;
         parte.agregarPunto(-medioAncho, medioAlto)
-            .agregarPunto(medioAncho, medioAlto)
-            .agregarPunto(medioAncho, -medioAlto)
-            .agregarPunto(-medioAncho, -medioAlto);
+                .agregarPunto(medioAncho, medioAlto)
+                .agregarPunto(medioAncho, -medioAlto)
+                .agregarPunto(-medioAncho, -medioAlto);
         parte.setPivote(0.0f, 0.0f);
         return parte;
     }
@@ -123,20 +122,20 @@ public class Pajaro extends Objeto {
         Parte cuerpo = new Parte(color);
         cuerpo.setVisibleConTextura(false);
         cuerpo.agregarPunto(-0.045f, 0.000f)
-            .agregarPunto(-0.028f, 0.028f)
-            .agregarPunto(0.008f, 0.038f)
-            .agregarPunto(0.040f, 0.018f)
-            .agregarPunto(0.040f, -0.018f)
-            .agregarPunto(0.008f, -0.038f)
-            .agregarPunto(-0.028f, -0.028f);
+                .agregarPunto(-0.028f, 0.028f)
+                .agregarPunto(0.008f, 0.038f)
+                .agregarPunto(0.040f, 0.018f)
+                .agregarPunto(0.040f, -0.018f)
+                .agregarPunto(0.008f, -0.038f)
+                .agregarPunto(-0.028f, -0.028f);
         return cuerpo;
     }
 
     private Parte crearAla(float[] colorBase) {
         float[] colorAla = {
-            Math.max(0.0f, colorBase[0] - 0.15f),
-            Math.max(0.0f, colorBase[1] - 0.18f),
-            Math.max(0.0f, colorBase[2] - 0.10f)
+                Math.max(0.0f, colorBase[0] - 0.15f),
+                Math.max(0.0f, colorBase[1] - 0.18f),
+                Math.max(0.0f, colorBase[2] - 0.10f)
         };
         Parte parte = new Parte(colorAla);
         parte.setVisibleConTextura(false);
@@ -144,29 +143,29 @@ public class Pajaro extends Objeto {
         parte.setY(-0.002f);
         parte.setPivote(-0.016f, 0.000f);
         parte.agregarPunto(-0.022f, 0.005f)
-            .agregarPunto(0.000f, 0.022f)
-            .agregarPunto(0.020f, 0.008f)
-            .agregarPunto(0.010f, -0.028f)
-            .agregarPunto(-0.018f, -0.018f);
+                .agregarPunto(0.000f, 0.022f)
+                .agregarPunto(0.020f, 0.008f)
+                .agregarPunto(0.010f, -0.028f)
+                .agregarPunto(-0.018f, -0.018f);
         return parte;
     }
 
     private Parte crearPico() {
-        Parte pico = new Parte(new float[] {1.00f, 0.52f, 0.10f});
+        Parte pico = new Parte(new float[] { 1.00f, 0.52f, 0.10f });
         pico.setVisibleConTextura(false);
         pico.agregarPunto(0.038f, 0.008f)
-            .agregarPunto(0.065f, 0.000f)
-            .agregarPunto(0.038f, -0.010f);
+                .agregarPunto(0.065f, 0.000f)
+                .agregarPunto(0.038f, -0.010f);
         return pico;
     }
 
     private Parte crearOjo() {
-        Parte ojo = new Parte(new float[] {0.08f, 0.08f, 0.12f});
+        Parte ojo = new Parte(new float[] { 0.08f, 0.08f, 0.12f });
         ojo.setVisibleConTextura(false);
         ojo.agregarPunto(0.008f, 0.015f)
-            .agregarPunto(0.018f, 0.020f)
-            .agregarPunto(0.022f, 0.012f)
-            .agregarPunto(0.014f, 0.005f);
+                .agregarPunto(0.018f, 0.020f)
+                .agregarPunto(0.022f, 0.012f)
+                .agregarPunto(0.014f, 0.005f);
         return ojo;
     }
 
@@ -176,13 +175,14 @@ public class Pajaro extends Objeto {
             return resolverRutaPajaro(objetoEsAzul() ? Constantes.COLOR_JUGADOR2 : Constantes.COLOR_JUGADOR1, "upflap");
         }
         if (velocidadY < -0.25f || ciclo < -0.35f) {
-            return resolverRutaPajaro(objetoEsAzul() ? Constantes.COLOR_JUGADOR2 : Constantes.COLOR_JUGADOR1, "downflap");
+            return resolverRutaPajaro(objetoEsAzul() ? Constantes.COLOR_JUGADOR2 : Constantes.COLOR_JUGADOR1,
+                    "downflap");
         }
         return resolverRutaPajaro(objetoEsAzul() ? Constantes.COLOR_JUGADOR2 : Constantes.COLOR_JUGADOR1, "midflap");
     }
 
     private boolean objetoEsAzul() {
-        return xInicial == Juego.BIRD_X_PLAYER2;
+        return xInicial == Constantes.BIRD_X_PLAYER2;
     }
 
     private String resolverRutaPajaro(float[] colorBase, String frame) {
